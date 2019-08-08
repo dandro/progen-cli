@@ -3,21 +3,22 @@
 module Command
   ( makeGenCommand
   , GenCommand(GenCommand)
-  , printString
   , parserOptions
+  , What(..)
   ) where
 
 import           Data.Semigroup      ((<>))
 import           Options.Applicative (Parser, eitherReader, fullDesc, header,
                                       help, helper, info, long, option,
-                                      progDesc, short, (<**>))
+                                      progDesc, short, strOption, (<**>))
 
 data What =
   Component
 
 data GenCommand =
   GenCommand
-    { what :: What
+    { what     :: What
+    , filename :: String
     }
 
 makeGenCommand :: Parser GenCommand
@@ -28,13 +29,11 @@ makeGenCommand =
        (\case
           "comp" -> Right Component
           invalid -> Left $ invalid ++ " is currently not supported"))
-    (long "what" <> short 'w' <> help "What do you want to generate")
+    (long "what" <> short 'w' <> help "What do you want to generate") <*>
+  strOption (long "name" <> short 'n' <> help "Name of file you're generating")
 
 parserOptions =
   info
     (makeGenCommand <**> helper)
-    (fullDesc <> progDesc "Generate code for free" <>
+    (fullDesc <> progDesc "Let's make your life easier" <>
      header "Welcome to Progen Cli - Generate whatever you want for free")
-
-printString :: GenCommand -> IO ()
-printString (GenCommand Component) = putStrLn "Got my Component command"
