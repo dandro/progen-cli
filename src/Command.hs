@@ -14,6 +14,7 @@ import           Options.Applicative (Parser, eitherReader, fullDesc, header,
 
 data What =
   Component
+  | Reducer
 
 data GenCommand =
   GenCommand
@@ -28,6 +29,7 @@ makeGenCommand =
     (eitherReader
        (\case
           "comp" -> Right Component
+          "reducer" -> Right Reducer
           invalid -> Left $ invalid ++ " is currently not supported"))
     (long "what" <> short 'w' <> help "What do you want to generate") <*>
   strOption (long "name" <> short 'n' <> help "Name of file you're generating")

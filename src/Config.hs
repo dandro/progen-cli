@@ -16,4 +16,4 @@ data GenConfig =
     }
 
 makeDefaultConfig :: GenConfig
-makeDefaultConfig = GenConfig "/Users/daniel.martinez/Documents/js/dummy-project/" JavaScript
+makeDefaultConfig = GenConfig "/Users/daniel.martinez/Documents/js/dummy-project/" Flow

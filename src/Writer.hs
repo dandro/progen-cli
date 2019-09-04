@@ -12,7 +12,7 @@ import           Template         (Template, content, extension, filename)
 
 write :: GenConfig -> Template -> IO (Either String String)
 write config template =
-  (\_ -> Right "All done") <$> -- TODO find a way to remove the lambda
+  (Right $ "Created " <> filename template) <$
   (getFileHandler (projectDir config) (filename template <> extension template) >>=
    persistWithContent (content template))
 
