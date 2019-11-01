@@ -2,7 +2,7 @@
 
 module Command
   ( makeGenCommand
-  , GenCommand(GenCommand)
+  , GenCommand(GenCommand, what, name)
   , parserOptions
   , What(..)
   ) where
@@ -12,14 +12,14 @@ import           Options.Applicative (Parser, eitherReader, fullDesc, header,
                                       help, helper, info, long, option,
                                       progDesc, short, strOption, (<**>))
 
-data What =
-  Component
+data What
+  = Component
   | Reducer
 
 data GenCommand =
   GenCommand
-    { what     :: What
-    , filename :: String
+    { what :: What
+    , name :: String
     }
 
 makeGenCommand :: Parser GenCommand
