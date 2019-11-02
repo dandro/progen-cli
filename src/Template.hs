@@ -1,24 +1,20 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Template
   ( Template(filename, content, extension)
-  , resolveTemplate
+  , getTemplateFiles
   ) where
 
-import           Command (GenCommand (GenCommand), What (Component, Reducer))
-import           Config  (GenConfig, Language (Flow, JavaScript, TypeScript),
-                          language)
-
-reactStatelessComponentTemplate =
-  "import React from 'react';\n\nexport default function myName(props) {\n\treturn <p>My dummy component</p>\n}"
-
-reactStatelessComponentFlowTemplate =
-  "import React from 'react';\nimport type { Props } from './types';\n\nexport default function myName(props: Props) {\n\treturn <p>My dummy component</p>\n}"
-
-reactStatelessComponentTypesFlowTemplate = "// @flow\n\nexport type Props = {};"
-
-reducerTemplate =
-  "function reducer(state, action) {\n\t switch(action.type) {\n\t\tdefault:\n\t\t\treturn state;\n\t}\n}"
-
-reducerFlowTemplate = "// @flow\n\nexport type State = {};\nexport type Action = {};"
+import           Command               (GenCommand (GenCommand),
+                                        What (Component, Reducer), name, what)
+import           Config                (GenConfig,
+                                        Language (Flow, JavaScript, TypeScript),
+                                        getConfig, language, templatesDir)
+import qualified Data.ByteString.Char8 as BS
+import           Data.Functor          ((<&>))
+import           System.Directory      (doesDirectoryExist, listDirectory)
+import           Utils                 (joinWith)
+import System.FilePath ((</>))
 
 data Template =
   Template
@@ -27,31 +23,36 @@ data Template =
     , extension :: String
     }
 
-data ModeTemplateConfig =
-  ModeTemplateConfig
-    { template :: String
-    , suffix   :: String
-    , ext      :: String
-    }
+toPred :: What -> FilePath -> Bool
+toPred Component path = BS.isPrefixOf (BS.pack "component") (BS.pack path)
+toPred Reducer path   = BS.isPrefixOf (BS.pack "reducer") (BS.pack path)
 
-getComponentTemplatesForMode :: Language -> [ModeTemplateConfig]
-getComponentTemplatesForMode JavaScript = [ModeTemplateConfig reactStatelessComponentTemplate "" ".js"]
-getComponentTemplatesForMode Flow =
-  [ ModeTemplateConfig reactStatelessComponentFlowTemplate ".view" ".js"
-  , ModeTemplateConfig reactStatelessComponentTypesFlowTemplate ".types" ".js"
-  ]
-getComponentTemplatesForMode TypeScript = [ModeTemplateConfig reactStatelessComponentTemplate "" ".ts"]
+toTemplate :: String -> (String, String) -> Template
+toTemplate name (path, content) =
+  Template (joinWith "." [name, suffix path]) content (ext path)
 
-getReducerTemplatesForMode :: Language -> [ModeTemplateConfig]
-getReducerTemplatesForMode JavaScript = [ModeTemplateConfig reducerTemplate "" ".js"]
-getReducerTemplatesForMode Flow =
-  [ModeTemplateConfig reducerTemplate "" ".js", ModeTemplateConfig reducerFlowTemplate ".types" ".js"]
-getReducerTemplatesForMode TypeScript = [ModeTemplateConfig reducerTemplate "" ".ts"]
+suffix :: String -> String
+suffix path = BS.unpack $ findSuffix $ BS.split '.' (BS.pack path)
+  where
+    findSuffix xs =
+      if length xs > 2
+        then xs !! 1
+        else BS.pack ""
 
-resolveTemplate :: GenConfig -> GenCommand -> [Template]
-resolveTemplate config (GenCommand Component filename) =
-  (\(ModeTemplateConfig template suffix ext) -> Template (filename <> suffix) template ext) <$>
-  getComponentTemplatesForMode (language config)
-resolveTemplate config (GenCommand Reducer filename) =
-  (\(ModeTemplateConfig template suffix ext) -> Template (filename <> suffix) template ext) <$>
-  getReducerTemplatesForMode (language config)
+ext :: String -> String
+ext path = BS.unpack $ last $ BS.split '.' (BS.pack path)
+
+getTemplateFiles :: GenConfig -> GenCommand -> IO [Template]
+getTemplateFiles config command =
+  doesDirectoryExist templatesPath >>=
+  (\case
+     True ->
+       listDirectory templatesPath <&> filter pred >>=
+       (\paths -> do
+          contents <- traverse (readFile . (</>) templatesPath) paths -- TODO: Handle error when file does not exist
+          pure $ zip paths contents)
+     False -> pure []) <&> -- TODO: This should return an Either left of no template found
+  (<$>) (toTemplate $ name command)
+  where
+    templatesPath = templatesDir config
+    pred = toPred $ what command

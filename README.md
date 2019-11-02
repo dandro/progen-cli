@@ -5,5 +5,3 @@ Cli tool for generating code for your project. The initial implementation will b
 
 ## Development
 The project runs on Haskell GHC and has been setup with Stack version lts-13.29.
-
-
