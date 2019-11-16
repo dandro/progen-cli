@@ -2,8 +2,7 @@ module Writer
   ( write
   ) where
 
-import           Command               (GenCommand (GenCommand),
-                                        What (Component))
+import           Command               (GenCommand (GenCommand))
 import           Config                (GenConfig, language, projectDir)
 import qualified Data.ByteString.Char8 as BS
 import           System.Directory      (createDirectory,

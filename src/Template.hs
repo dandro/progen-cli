@@ -5,16 +5,15 @@ module Template
   , getTemplateFiles
   ) where
 
-import           Command               (GenCommand (GenCommand),
-                                        What (Component, Reducer), name, what)
+import           Command               (GenCommand (GenCommand), name, what)
 import           Config                (GenConfig,
                                         Language (Flow, JavaScript, TypeScript),
                                         getConfig, language, templatesDir)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
 import           System.Directory      (doesDirectoryExist, listDirectory)
+import           System.FilePath       ((</>))
 import           Utils                 (joinWith)
-import System.FilePath ((</>))
 
 data Template =
   Template
@@ -23,9 +22,8 @@ data Template =
     , extension :: String
     }
 
-toPred :: What -> FilePath -> Bool
-toPred Component path = BS.isPrefixOf (BS.pack "component") (BS.pack path)
-toPred Reducer path   = BS.isPrefixOf (BS.pack "reducer") (BS.pack path)
+toPred :: String -> FilePath -> Bool
+toPred str path = BS.isPrefixOf (BS.pack str) (BS.pack path)
 
 toTemplate :: String -> (String, String) -> Template
 toTemplate name (path, content) =
