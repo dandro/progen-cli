@@ -33,9 +33,10 @@ suffix :: String -> String
 suffix path = findSuffix $ map BS.unpack $ BS.split '.' (BS.pack path)
   where
     findSuffix xs =
-      if length xs > 2
+      if hasSuffix xs
         then joinWith "." $ take (length xs - 2) (tail xs)
         else ""
+    hasSuffix xs = length xs > 2
 
 ext :: String -> String
 ext path = BS.unpack $ last $ BS.split '.' (BS.pack path)
