@@ -30,12 +30,12 @@ toTemplate name (path, content) =
   Template (joinWith "." [name, suffix path]) content (ext path)
 
 suffix :: String -> String
-suffix path = BS.unpack $ findSuffix $ BS.split '.' (BS.pack path)
+suffix path = findSuffix $ map BS.unpack $ BS.split '.' (BS.pack path)
   where
     findSuffix xs =
       if length xs > 2
-        then xs !! 1
-        else BS.pack ""
+        then joinWith "." $ take (length xs - 2) (tail xs)
+        else ""
 
 ext :: String -> String
 ext path = BS.unpack $ last $ BS.split '.' (BS.pack path)
