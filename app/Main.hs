@@ -2,7 +2,7 @@
 
 module Main where
 
-import           Command             (makeGenCommand, parserOptions)
+import           Command             (parserOptions)
 import           Config              (getConfig)
 import           Data.List           (intersperse)
 import           Options.Applicative (execParser)

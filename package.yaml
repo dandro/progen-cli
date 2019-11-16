@@ -27,6 +27,7 @@ dependencies:
 - bytestring >= 0.10.0.0
 - text >= 1.2.3.0
 - filepath
+- hashmap >= 1.3.0
 
 library:
   source-dirs: src
@@ -47,6 +48,7 @@ executables:
     - bytestring
     - text
     - filepath
+    - hashmap
 
 tests:
   progen-cli-test:
@@ -64,3 +66,4 @@ tests:
     - bytestring
     - text
     - filepath
+    - hashmap
