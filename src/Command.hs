@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Command
-  ( GenCommand(GenCommand, what, name)
+  ( GenCommand(GenCommand, what, name, sub)
   , parserOptions
   ) where
 

@@ -2,6 +2,7 @@
 
 module Template
   ( Template(filename, content, extension)
+  , mkTemplate
   , getTemplateFiles
   ) where
 
@@ -40,6 +41,9 @@ suffix path = findSuffix $ map BS.unpack $ BS.split '.' (BS.pack path)
 
 ext :: String -> String
 ext path = BS.unpack $ last $ BS.split '.' (BS.pack path)
+
+mkTemplate :: String -> String -> String -> Template
+mkTemplate = Template
 
 getTemplateFiles :: GenConfig -> GenCommand -> IO [Template]
 getTemplateFiles config command =
