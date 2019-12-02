@@ -1,0 +1,5 @@
+{
+  "projectDir": "DIR_PATH",
+  "language": "Flow|JavaScript",
+  "templatesDir": "TEMPLATES_PATH"
+}
