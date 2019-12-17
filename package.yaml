@@ -23,12 +23,11 @@ dependencies:
 - base >= 4.7 && < 5
 - optparse-applicative >= 0.14
 - directory >= 1.3.3.0
-- json-stream >= 0.4.2.4
 - bytestring >= 0.10.0.0
 - text >= 1.2.3.0
 - filepath
-- hashmap >= 1.3.0
 - containers >= 0.6.0.1
+- aeson >= 1.4.2.0
 
 library:
   source-dirs: src
@@ -45,12 +44,11 @@ executables:
     - progen-cli
     - optparse-applicative
     - directory
-    - json-stream
     - bytestring
     - text
     - filepath
-    - hashmap
     - containers
+    - aeson
 
 tests:
   progen-cli-test:
@@ -64,9 +62,8 @@ tests:
     - progen-cli
     - optparse-applicative
     - directory
-    - json-stream
     - bytestring
     - text
     - filepath
-    - hashmap
     - containers
+    - aeson
