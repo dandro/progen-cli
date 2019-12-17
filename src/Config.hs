@@ -7,7 +7,6 @@ module Config
   , getConfig
   ) where
 
-import qualified Data.ByteString.Char8      as C
 import qualified Data.ByteString.Lazy.Char8 as LazyC
 import           Data.Functor               ((<&>))
 import qualified Data.Map.Strict            as M
