@@ -3,7 +3,7 @@ module Transformations
   ) where
 
 import           Command      (GenCommand, sub)
-import qualified Data.HashMap as M
+import qualified Data.Map as M
 import qualified Data.Text    as T
 import           Template     (Template, content, extension, filename,
                                mkTemplate)

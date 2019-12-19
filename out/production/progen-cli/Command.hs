@@ -6,7 +6,7 @@ module Command
   ) where
 
 import qualified Data.ByteString.Char8 as BS
-import qualified Data.HashMap          as M
+import qualified Data.Map          as M
 import           Data.Semigroup        ((<>))
 import qualified Data.Text             as T
 import           Options.Applicative   (Parser, eitherReader, fullDesc, header,

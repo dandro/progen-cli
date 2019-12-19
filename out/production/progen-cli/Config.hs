@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Config
   ( GenConfig(projectDir, language, templatesDir)
@@ -9,27 +10,30 @@ module Config
 import qualified Data.ByteString.Char8      as C
 import qualified Data.ByteString.Lazy.Char8 as LazyC
 import           Data.Functor               ((<&>))
-import qualified Data.HashMap               as M
-import           Data.JsonStream.Parser     (decode, parseByteString, value,
-                                             (.:))
-import qualified Data.Map.Strict            as MM
+import qualified Data.Map.Strict            as M
 import           Data.Monoid                (Last (Last), getLast)
 import qualified Data.Text                  as T
 import           System.Directory           (findFile, getCurrentDirectory)
 import           Utils                      (upperCase)
+import GHC.Generics (Generic)
+import Data.Aeson (decode, FromJSON)
 
 data Language
   = JavaScript
   | Flow
-  | TypeScript
+  | TypeScript deriving (Generic, Show)
+
+instance FromJSON Language
 
 data GenConfigOption =
   GenConfigOption
     { projectDirOption   :: Last String
     , languageOption     :: Last Language
     , templatesDirOption :: Last String
-    , outputDirsOption   :: Last (MM.Map String String)
-    }
+    , outputDirsOption   :: Last (M.Map String String)
+    } deriving (Generic, Show)
+
+instance FromJSON GenConfigOption
 
 instance Semigroup GenConfigOption where
   a <> b =
@@ -45,8 +49,8 @@ data GenConfig =
     { projectDir   :: String
     , language     :: Language
     , templatesDir :: String
-    , outputDirs   :: MM.Map String String
-    }
+    , outputDirs   :: M.Map String String
+    } deriving (Show)
 
 dotfile :: String
 dotfile = ".progenrc"
@@ -57,15 +61,7 @@ makeDefaultConfig =
     (Last $ Just "/Users/daniel.martinez/Documents/js/dummy-project/")
     (Last $ Just JavaScript)
     (Last $ Just "/Users/daniel.martinez/Documents/js/dummy-project/.progenrc/templates/")
-    (Last $ Just MM.empty)
-
-safeHead :: [String] -> Maybe String
-safeHead (h:_) = Just h
-safeHead _     = Nothing
-
-safeGetStr :: String -> String -> Maybe String
-safeGetStr key content =
-  safeHead (parseByteString (T.pack key .: value) (C.pack content) :: [String])
+    (Last $ Just M.empty)
 
 toLang :: String -> Maybe Language
 toLang str =
@@ -79,32 +75,27 @@ emptyConfigOption :: GenConfigOption
 emptyConfigOption =
   GenConfigOption (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing)
 
-safeGetMap :: String -> String -> Maybe (MM.Map String String)
-safeGetMap key content =
-  safeGetStr key content >>= (\x -> decode (LazyC.pack x) :: Maybe (MM.Map String String))
+decodeConfig :: Maybe String -> GenConfigOption
+decodeConfig content = do
+    let result = content >>= (\c -> decode (LazyC.pack c) :: Maybe GenConfigOption)
+    case result of
+      Just conf -> conf
+      Nothing -> emptyConfigOption
 
-findConfig :: IO GenConfigOption
-findConfig =
-  getCurrentDirectory >>=
-  (\pwd -> findFile [pwd] dotfile >>= traverse readFile) <&>
-  (\case
-     Just content ->
-       GenConfigOption
-         (Last $ safeGetStr "projectDir" content)
-         (Last $ toLang =<< safeGetStr "language" content)
-         (Last $ safeGetStr "templatesDir" content)
-         (Last $ safeGetMap "outputDirs" content)
-     Nothing -> emptyConfigOption)
+mkConfig :: GenConfigOption -> Maybe GenConfig
+mkConfig configOption = 
+  GenConfig <$> getLast (projectDirOption configOption) <*>
+          getLast (languageOption configOption) <*>
+          getLast (templatesDirOption configOption) <*>
+          getLast (outputDirsOption configOption)
 
 getConfig :: IO (Either String GenConfig)
 getConfig = do
-  conf <- findConfig
+  pwd <- getCurrentDirectory
+  content <- findFile [pwd] dotfile >>= traverse readFile
+  let conf = decodeConfig content
   let combined = makeDefaultConfig <> conf
-  let result =
-        GenConfig <$> getLast (projectDirOption combined) <*>
-        getLast (languageOption combined) <*>
-        getLast (templatesDirOption combined) <*>
-        getLast (outputDirsOption combined)
+  let result = mkConfig combined
   pure $
     case result of
       Just config -> Right config
