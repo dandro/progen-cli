@@ -92,9 +92,7 @@ getConfig :: IO (Either String GenConfig)
 getConfig = do
   pwd <- getCurrentDirectory
   content <- findFile [pwd] dotfile >>= traverse readFile
-  let conf = decodeConfig content
-  let combined = makeDefaultConfig <> conf
-  let result = mkConfig combined
+  let result = mkConfig $ makeDefaultConfig <> (decodeConfig content)
   pure $
     case result of
       Just config -> Right config
