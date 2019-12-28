@@ -23,6 +23,7 @@ data Template =
     , extension  :: String
     , sourcePath :: String
     }
+  deriving (Show, Eq)
 
 toTemplate :: String -> (String, String) -> Template
 toTemplate name (path, content) = Template (joinWith "." [name, suffix path]) content (ext path) path -- TODO: Here the . is the "separator" and should come from the config

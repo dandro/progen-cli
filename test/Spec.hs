@@ -1,2 +1,10 @@
+module Main where
+
+import           Test.Hspec (hspec)
+import           UtilsSpec  (utilsSuite)
+import TransformationsSpec (transformationsSuite)
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = hspec $ do 
+  utilsSuite
+  transformationsSuite

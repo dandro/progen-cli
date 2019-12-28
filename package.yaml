@@ -60,6 +60,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - progen-cli
+    - hspec
     - optparse-applicative
     - directory
     - bytestring
