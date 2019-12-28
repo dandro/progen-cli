@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Template
-  ( Template(filename, content, extension)
+  ( Template(filename, content, extension, sourcePath)
   , mkTemplate
   , getTemplateFiles
   ) where
@@ -14,34 +14,32 @@ import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
 import           System.Directory      (doesDirectoryExist, listDirectory)
 import           System.FilePath       ((</>))
-import           Utils                 (joinWith)
+import           Utils                 (joinWith, pathStartsWith)
 
 data Template =
   Template
-    { filename  :: String
-    , content   :: String
-    , extension :: String
+    { filename   :: String
+    , content    :: String
+    , extension  :: String
+    , sourcePath :: String
     }
 
-toPred :: String -> FilePath -> Bool
-toPred str path = BS.isPrefixOf (BS.pack str) (BS.pack path)
-
 toTemplate :: String -> (String, String) -> Template
-toTemplate name (path, content) = Template (joinWith "." [name, suffix path]) content (ext path)
+toTemplate name (path, content) = Template (joinWith "." [name, suffix path]) content (ext path) path -- TODO: Here the . is the "separator" and should come from the config
 
 suffix :: String -> String
-suffix path = findSuffix $ map BS.unpack $ BS.split '.' (BS.pack path)
+suffix path = findSuffix $ map BS.unpack $ BS.split '.' (BS.pack path) -- TODO: Take the "separator" form the config
   where
     findSuffix xs =
       if hasSuffix xs
-        then joinWith "." $ take (length xs - 2) (tail xs)
+        then joinWith "." $ take (length xs - 2) (tail xs) -- TODO: Take the "separator" from the config
         else ""
     hasSuffix xs = length xs > 2
 
 ext :: String -> String
-ext path = BS.unpack $ last $ BS.split '.' (BS.pack path)
+ext path = BS.unpack $ last $ BS.split '.' (BS.pack path) -- TODO: Take the "separator" from the config
 
-mkTemplate :: String -> String -> String -> Template
+mkTemplate :: String -> String -> String -> String -> Template
 mkTemplate = Template
 
 getTemplateFiles :: GenConfig -> GenCommand -> IO [Template]
@@ -57,4 +55,4 @@ getTemplateFiles config command =
   (<$>) (toTemplate $ name command)
   where
     templatesPath = templatesDir config
-    pred = toPred $ what command
+    pred = pathStartsWith $ what command

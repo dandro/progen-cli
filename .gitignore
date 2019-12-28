@@ -3,3 +3,6 @@ progen-cli.cabal
 *~
 .idea
 .vscode
+.progenrc
+*.iml
+out/

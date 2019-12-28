@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Config
-  ( GenConfig(projectDir, language, templatesDir)
+  ( GenConfig(projectDir, language, templatesDir, outputDirs)
   , Language(..)
   , getConfig
   ) where
