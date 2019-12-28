@@ -17,8 +17,7 @@ import           Utils                 (joinWith)
 write :: GenConfig -> Template -> IO (Either String String)
 write config template =
   (Right $ "Created " <> filename template) <$
-  (getFileHandler (projectDir config) (getNameWithExt template) >>=
-   persistWithContent (content template))
+  (getFileHandler (projectDir config) (getNameWithExt template) >>= persistWithContent (content template))
 
 getNameWithExt :: Template -> String
 getNameWithExt template = joinWith "." [filename template, extension template]

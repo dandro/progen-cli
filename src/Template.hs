@@ -27,8 +27,7 @@ toPred :: String -> FilePath -> Bool
 toPred str path = BS.isPrefixOf (BS.pack str) (BS.pack path)
 
 toTemplate :: String -> (String, String) -> Template
-toTemplate name (path, content) =
-  Template (joinWith "." [name, suffix path]) content (ext path)
+toTemplate name (path, content) = Template (joinWith "." [name, suffix path]) content (ext path)
 
 suffix :: String -> String
 suffix path = findSuffix $ map BS.unpack $ BS.split '.' (BS.pack path)
