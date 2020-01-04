@@ -1,9 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Config
-  ( GenConfig(projectDir, language, templatesDir, outputDirs,
-          separator)
-  , Language(..)
+  ( GenConfig(projectDir, templatesDir, outputDirs, separator)
   , getConfig
   ) where
 
@@ -18,40 +16,29 @@ import           GHC.Generics               (Generic)
 import           System.Directory           (findFile, getCurrentDirectory)
 import           Utils                      (upperCase)
 
-data Language
-  = JavaScript
-  | Flow
-  | TypeScript
-  deriving (Generic, Show)
-
-instance FromJSON Language
-
-data GenConfigOption =
-  GenConfigOption
-    { projectDirOption   :: Last String
-    , languageOption     :: Last Language
-    , templatesDirOption :: Last String
-    , outputDirsOption   :: Last (M.Map String String)
-    , separatorOption    :: Last Char
+data Dotfile =
+  Dotfile
+    { root              :: Last String
+    , templates         :: Last String
+    , output            :: Last (M.Map String String)
+    , filenameSeparator :: Last Char
     }
   deriving (Generic, Show)
 
-instance FromJSON GenConfigOption
+instance FromJSON Dotfile
 
-instance Semigroup GenConfigOption where
+instance Semigroup Dotfile where
   a <> b =
-    GenConfigOption
-      { projectDirOption = projectDirOption a <> projectDirOption b
-      , languageOption = languageOption a <> languageOption b
-      , templatesDirOption = templatesDirOption a <> templatesDirOption b
-      , outputDirsOption = outputDirsOption a <> outputDirsOption b
-      , separatorOption = separatorOption a <> separatorOption b
+    Dotfile
+      { root = root a <> root b
+      , templates = templates a <> templates b
+      , output = output a <> output b
+      , filenameSeparator = filenameSeparator a <> filenameSeparator b
       }
 
 data GenConfig =
   GenConfig
     { projectDir   :: String
-    , language     :: Language
     , templatesDir :: String
     , outputDirs   :: M.Map String String
     , separator    :: Char
@@ -61,23 +48,21 @@ data GenConfig =
 dotfile :: String
 dotfile = ".progenrc"
 
-makeDefaultConfig :: GenConfigOption
-makeDefaultConfig = GenConfigOption (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing) (Last $ Just '.')
+makeDefaultConfig :: Dotfile
+makeDefaultConfig = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last $ Just '.')
 
-emptyConfigOption :: GenConfigOption
-emptyConfigOption = GenConfigOption (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing)
+emptyConfigOption :: Dotfile
+emptyConfigOption = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing)
 
-decodeConfig :: Maybe String -> GenConfigOption
+decodeConfig :: Maybe String -> Dotfile
 decodeConfig content = do
-  let result = content >>= (\c -> decode (LazyC.pack c) :: Maybe GenConfigOption)
+  let result = content >>= (\c -> decode (LazyC.pack c) :: Maybe Dotfile)
   fromMaybe emptyConfigOption result
 
-mkConfig :: GenConfigOption -> Maybe GenConfig
+mkConfig :: Dotfile -> Maybe GenConfig
 mkConfig configOption =
-  GenConfig <$> getLast (projectDirOption configOption) <*> getLast (languageOption configOption) <*>
-  getLast (templatesDirOption configOption) <*>
-  getLast (outputDirsOption configOption) <*>
-  getLast (separatorOption configOption)
+  GenConfig <$> getLast (root configOption) <*> getLast (templates configOption) <*> getLast (output configOption) <*>
+  getLast (filenameSeparator configOption)
 
 getConfig :: IO (Either String GenConfig)
 getConfig = do

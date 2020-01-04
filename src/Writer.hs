@@ -3,8 +3,8 @@ module Writer
   ) where
 
 import           Command               (GenCommand (GenCommand))
-import           Config                (GenConfig, language, outputDirs,
-                                        projectDir, separator)
+import           Config                (GenConfig, outputDirs, projectDir,
+                                        separator)
 import qualified Data.ByteString.Char8 as BS
 import           Data.List             (find)
 import qualified Data.Map.Strict       as M
