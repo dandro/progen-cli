@@ -1,10 +1,13 @@
 module Main where
 
-import           Test.Hspec (hspec)
-import           UtilsSpec  (utilsSuite)
-import TransformationsSpec (transformationsSuite)
+import           ConfigSpec          (configSuite)
+import           Test.Hspec          (hspec)
+import           TransformationsSpec (transformationsSuite)
+import           UtilsSpec           (utilsSuite)
 
 main :: IO ()
-main = hspec $ do 
-  utilsSuite
-  transformationsSuite
+main =
+  hspec $ do
+    utilsSuite
+    transformationsSuite
+    configSuite

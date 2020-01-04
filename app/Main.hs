@@ -14,7 +14,7 @@ import           Writer              (write)
 
 getConfig :: IO (Either String GenConfig)
 getConfig = do
-  pwd <- getCurrentDirectory -- TODO: Should handle possible errors (This can throw some erors)
+  pwd <- getCurrentDirectory -- TODO: Should handle possible errors (This can throw some errors)
   result <- findFile [pwd] dotfileName >>= traverse readFile <&> (>>= mkConfig) -- TODO: test for findFile Nothing and mkConfig Nothing
   pure $
     case result of

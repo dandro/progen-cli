@@ -43,7 +43,7 @@ data GenConfig =
     , outputDirs   :: M.Map String String
     , separator    :: Char
     }
-  deriving (Show)
+  deriving (Show, Eq)
 
 dotfileName :: String
 dotfileName = ".progenrc"
