@@ -4,7 +4,7 @@ module Writer
 
 import           Command               (GenCommand (GenCommand))
 import           Config                (GenConfig, language, outputDirs,
-                                        projectDir)
+                                        projectDir, separator)
 import qualified Data.ByteString.Char8 as BS
 import           Data.List             (find)
 import qualified Data.Map.Strict       as M
@@ -22,7 +22,7 @@ import           Utils                 (joinWith, pathStartsWith)
 write :: GenConfig -> Template -> IO (Either String String)
 write config template =
   (Right $ "Created " <> filename template) <$ -- TODO: Fix this so we can handle errors (Lefts)
-  (getFileHandler out (getNameWithExt template) >>= persistWithContent (content template))
+  (getFileHandler out (getNameWithExt (separator config) template) >>= persistWithContent (content template))
   where
     out = mkOutputDir (projectDir config) (outputDirs config) (sourcePath template)
 
@@ -37,8 +37,8 @@ mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputD
                (find (pathStartsWith pathPrefix) dirKeys >>= (`M.lookup` dirs))
     dirKeys = M.keys configOutputDirs
 
-getNameWithExt :: Template -> String
-getNameWithExt template = joinWith "." [filename template, extension template]
+getNameWithExt :: Char -> Template -> String
+getNameWithExt separator' template = joinWith [separator'] [filename template, extension template]
 
 getFileHandler :: FilePath -> FilePath -> IO Handle
 getFileHandler dirPath filePath = do

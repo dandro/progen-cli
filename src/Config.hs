@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Config
-  ( GenConfig(projectDir, language, templatesDir, outputDirs)
+  ( GenConfig(projectDir, language, templatesDir, outputDirs,
+          separator)
   , Language(..)
   , getConfig
   ) where
@@ -31,6 +32,7 @@ data GenConfigOption =
     , languageOption     :: Last Language
     , templatesDirOption :: Last String
     , outputDirsOption   :: Last (M.Map String String)
+    , separatorOption    :: Last Char
     }
   deriving (Generic, Show)
 
@@ -43,6 +45,7 @@ instance Semigroup GenConfigOption where
       , languageOption = languageOption a <> languageOption b
       , templatesDirOption = templatesDirOption a <> templatesDirOption b
       , outputDirsOption = outputDirsOption a <> outputDirsOption b
+      , separatorOption = separatorOption a <> separatorOption b
       }
 
 data GenConfig =
@@ -51,6 +54,7 @@ data GenConfig =
     , language     :: Language
     , templatesDir :: String
     , outputDirs   :: M.Map String String
+    , separator    :: Char
     }
   deriving (Show)
 
@@ -58,23 +62,10 @@ dotfile :: String
 dotfile = ".progenrc"
 
 makeDefaultConfig :: GenConfigOption
-makeDefaultConfig =
-  GenConfigOption
-    (Last $ Just "/Users/daniel.martinez/Documents/js/dummy-project/")
-    (Last $ Just JavaScript)
-    (Last $ Just "/Users/daniel.martinez/Documents/js/dummy-project/.progenrc/templates/")
-    (Last $ Just M.empty)
-
-toLang :: String -> Maybe Language
-toLang str =
-  case upperCase str of
-    "JAVASCRIPT" -> Just JavaScript
-    "FLOW"       -> Just Flow
-    "TYPESCRIPT" -> Just TypeScript
-    _            -> Nothing
+makeDefaultConfig = GenConfigOption (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing) (Last $ Just '.')
 
 emptyConfigOption :: GenConfigOption
-emptyConfigOption = GenConfigOption (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing)
+emptyConfigOption = GenConfigOption (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing)
 
 decodeConfig :: Maybe String -> GenConfigOption
 decodeConfig content = do
@@ -85,7 +76,8 @@ mkConfig :: GenConfigOption -> Maybe GenConfig
 mkConfig configOption =
   GenConfig <$> getLast (projectDirOption configOption) <*> getLast (languageOption configOption) <*>
   getLast (templatesDirOption configOption) <*>
-  getLast (outputDirsOption configOption)
+  getLast (outputDirsOption configOption) <*>
+  getLast (separatorOption configOption)
 
 getConfig :: IO (Either String GenConfig)
 getConfig = do
@@ -95,4 +87,4 @@ getConfig = do
   pure $
     case result of
       Just config -> Right config
-      Nothing     -> Left "ERROR: There is valid no configuration."
+      Nothing     -> Left "ERROR: Coud not make a valid configuration."

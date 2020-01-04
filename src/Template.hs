@@ -9,7 +9,7 @@ module Template
 import           Command               (GenCommand (GenCommand), name, what)
 import           Config                (GenConfig,
                                         Language (Flow, JavaScript, TypeScript),
-                                        getConfig, language, templatesDir)
+                                        getConfig, language, templatesDir, separator)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
 import           System.Directory      (doesDirectoryExist, listDirectory)
@@ -25,20 +25,21 @@ data Template =
     }
   deriving (Show, Eq)
 
-toTemplate :: String -> (String, String) -> Template
-toTemplate name (path, content) = Template (joinWith "." [name, suffix path]) content (ext path) path -- TODO: Here the . is the "separator" and should come from the config
+toTemplate :: Char -> String -> (String, String) -> Template
+toTemplate separator' name (path, content) =
+  Template (joinWith [separator'] [name, suffix separator' path]) content (ext separator' path) path
 
-suffix :: String -> String
-suffix path = findSuffix $ map BS.unpack $ BS.split '.' (BS.pack path) -- TODO: Take the "separator" form the config
+suffix :: Char -> String -> String
+suffix separator' path = findSuffix $ map BS.unpack $ BS.split separator' (BS.pack path)
   where
     findSuffix xs =
       if hasSuffix xs
-        then joinWith "." $ take (length xs - 2) (tail xs) -- TODO: Take the "separator" from the config
+        then joinWith [separator'] $ take (length xs - 2) (tail xs)
         else ""
     hasSuffix xs = length xs > 2
 
-ext :: String -> String
-ext path = BS.unpack $ last $ BS.split '.' (BS.pack path) -- TODO: Take the "separator" from the config
+ext :: Char -> String -> String
+ext separator' path = BS.unpack $ last $ BS.split separator' (BS.pack path)
 
 mkTemplate :: String -> String -> String -> String -> Template
 mkTemplate = Template
@@ -53,7 +54,7 @@ getTemplateFiles config command =
           contents <- traverse (readFile . (</>) templatesPath) paths -- TODO: Handle error when file does not exist
           pure $ zip paths contents)
      False -> pure []) <&> -- TODO: This should return an Either left of no template found
-  (<$>) (toTemplate $ name command)
+  (<$>) (toTemplate (separator config) (name command))
   where
     templatesPath = templatesDir config
     pred = pathStartsWith $ what command

@@ -1,5 +1,9 @@
 {
-  "projectDir": "DIR_PATH",
-  "language": "Flow|JavaScript",
-  "templatesDir": "TEMPLATES_PATH"
+  "projectDirOption": "DIR_PATH",
+  "languageOption": "Flow|JavaScript",
+  "templatesDirOption": "TEMPLATES_PATH",
+  "separatorOption": "FILENAME_SEPARATOR_CHAR",
+  "outputDirsOption": {
+    "FILENAME_KEY": "RELATIVE_PATH"
+  }
 }
