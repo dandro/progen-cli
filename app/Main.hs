@@ -14,12 +14,12 @@ import           Writer              (write)
 
 getConfig :: IO (Either String GenConfig)
 getConfig = do
-  pwd <- getCurrentDirectory
-  result <- findFile [pwd] dotfileName >>= traverse readFile <&> (>>= mkConfig)
+  pwd <- getCurrentDirectory -- TODO: Should handle possible errors (This can throw some erors)
+  result <- findFile [pwd] dotfileName >>= traverse readFile <&> (>>= mkConfig) -- TODO: test for findFile Nothing and mkConfig Nothing
   pure $
     case result of
       Just config -> Right config
-      Nothing -> Left "ERROR: Coud not make a valid configuration."
+      Nothing     -> Left "ERROR: Coud not make a valid configuration."
 
 main :: IO ()
 main = do
