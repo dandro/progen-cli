@@ -2,7 +2,8 @@
 
 module Config
   ( GenConfig(projectDir, templatesDir, outputDirs, separator)
-  , getConfig
+  , dotfileName
+  , mkConfig
   ) where
 
 import           Data.Aeson                 (FromJSON, decode)
@@ -13,7 +14,6 @@ import           Data.Maybe                 (fromMaybe)
 import           Data.Monoid                (Last (Last), getLast)
 import qualified Data.Text                  as T
 import           GHC.Generics               (Generic)
-import           System.Directory           (findFile, getCurrentDirectory)
 import           Utils                      (upperCase)
 
 data Dotfile =
@@ -45,8 +45,8 @@ data GenConfig =
     }
   deriving (Show)
 
-dotfile :: String
-dotfile = ".progenrc"
+dotfileName :: String
+dotfileName = ".progenrc"
 
 makeDefaultConfig :: Dotfile
 makeDefaultConfig = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last $ Just '.')
@@ -54,22 +54,12 @@ makeDefaultConfig = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last $
 emptyConfigOption :: Dotfile
 emptyConfigOption = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing)
 
-decodeConfig :: Maybe String -> Dotfile
-decodeConfig content = do
-  let result = content >>= (\c -> decode (LazyC.pack c) :: Maybe Dotfile)
-  fromMaybe emptyConfigOption result
+decodeConfig :: String -> Dotfile
+decodeConfig content = fromMaybe emptyConfigOption (decode (LazyC.pack content) :: Maybe Dotfile)
 
-mkConfig :: Dotfile -> Maybe GenConfig
-mkConfig configOption =
+mkConfig :: String -> Maybe GenConfig
+mkConfig content =
   GenConfig <$> getLast (root configOption) <*> getLast (templates configOption) <*> getLast (output configOption) <*>
   getLast (filenameSeparator configOption)
-
-getConfig :: IO (Either String GenConfig)
-getConfig = do
-  pwd <- getCurrentDirectory
-  content <- findFile [pwd] dotfile >>= traverse readFile
-  let result = mkConfig $ makeDefaultConfig <> decodeConfig content
-  pure $
-    case result of
-      Just config -> Right config
-      Nothing     -> Left "ERROR: Coud not make a valid configuration."
+  where
+    configOption = makeDefaultConfig <> decodeConfig content

@@ -7,8 +7,7 @@ module Template
   ) where
 
 import           Command               (GenCommand (GenCommand), name, what)
-import           Config                (GenConfig, getConfig, separator,
-                                        templatesDir)
+import           Config                (GenConfig, separator, templatesDir)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
 import           System.Directory      (doesDirectoryExist, listDirectory)
