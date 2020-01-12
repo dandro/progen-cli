@@ -11,7 +11,7 @@ import           Config                (GenConfig, separator, templatesDir)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
 import           System.Directory      (doesDirectoryExist, listDirectory)
-import           System.FilePath       ((</>))
+import           System.Path           ((</>), absDir, relFile)
 import           Utils                 (joinWith, pathStartsWith)
 
 data Template =
@@ -49,10 +49,10 @@ getTemplateFiles config command =
      True ->
        listDirectory templatesPath <&> filter pred >>=
        (\paths -> do
-          contents <- traverse (readFile . (</>) templatesPath) paths -- TODO: Handle error when file does not exist
+          contents <- traverse (readFile . (</>) templatesPath) (relFile paths) -- TODO: Handle error when file does not exist
           pure $ zip paths contents)
      False -> pure []) <&> -- TODO: This should return an Either left of no template found
   (<$>) (toTemplate (separator config) (name command))
   where
-    templatesPath = templatesDir config
+    templatesPath = absDir $ templatesDir config
     pred = pathStartsWith $ what command
