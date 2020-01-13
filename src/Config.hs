@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Config
   ( GenConfig(projectDir, templatesDir, outputDirs, separator)
@@ -6,7 +7,9 @@ module Config
   , mkConfig
   ) where
 
-import           Data.Aeson                 (FromJSON, decode)
+import           Data.Aeson                 (decode)
+import           Data.Aeson.Types           (FromJSON, Parser, parseJSON,
+                                             withObject, (.:))
 import qualified Data.ByteString.Lazy.Char8 as LazyC
 import           Data.Functor               ((<&>))
 import qualified Data.Map.Strict            as M
@@ -14,18 +17,34 @@ import           Data.Maybe                 (fromMaybe)
 import           Data.Monoid                (Last (Last), getLast)
 import qualified Data.Text                  as T
 import           GHC.Generics               (Generic)
+import           System.Path                (AbsDir, RelDir, absDir, relDir)
 import           Utils                      (upperCase)
 
 data Dotfile =
   Dotfile
-    { root              :: Last String
-    , templates         :: Last String
-    , output            :: Last (M.Map String String)
+    { root              :: Last AbsDir
+    , templates         :: Last AbsDir
+    , output            :: Last (M.Map String RelDir)
     , filenameSeparator :: Last Char
     }
   deriving (Generic, Show)
 
-instance FromJSON Dotfile
+mkAbsDir :: T.Text -> Last AbsDir
+mkAbsDir = Last . Just . absDir . T.unpack
+
+mkOutputDirs :: M.Map String String -> Last (M.Map String RelDir)
+mkOutputDirs m = Last $ Just (M.foldrWithKey (\k v result -> M.insert k (relDir v) result) M.empty m)
+
+instance FromJSON Dotfile where
+  parseJSON =
+    withObject
+      "Dotfile"
+      (\o -> do
+         root_ <- mkAbsDir <$> (o .: "root" :: Parser T.Text)
+         templates_ <- mkAbsDir <$> (o .: "templates" :: Parser T.Text)
+         output_ <- mkOutputDirs <$> (o .: "output" :: Parser (M.Map String String))
+         filenameSeparator_ <- o .: "filenameSeparator"
+         return $ Dotfile root_ templates_ output_ filenameSeparator_)
 
 instance Semigroup Dotfile where
   a <> b =
@@ -38,9 +57,9 @@ instance Semigroup Dotfile where
 
 data GenConfig =
   GenConfig
-    { projectDir   :: String
-    , templatesDir :: String
-    , outputDirs   :: M.Map String String
+    { projectDir   :: AbsDir
+    , templatesDir :: AbsDir
+    , outputDirs   :: M.Map String RelDir
     , separator    :: Char
     }
   deriving (Show, Eq)

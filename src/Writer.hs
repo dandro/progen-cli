@@ -12,9 +12,9 @@ import           Data.Maybe            (fromMaybe)
 import           System.Directory      (createDirectory,
                                         createDirectoryIfMissing,
                                         doesDirectoryExist)
-import           System.FilePath       ((</>))
 import           System.IO             (Handle, IOMode (ReadWriteMode), hClose,
                                         hPutStr, openFile)
+import           System.Path           (AbsDir, RelDir, (</>))
 import           Template              (Template, content, extension, filename,
                                         sourcePath)
 import           Utils                 (joinWith, pathStartsWith)
@@ -26,7 +26,7 @@ write config template =
   where
     out = mkOutputDir (projectDir config) (outputDirs config) (sourcePath template)
 
-mkOutputDir :: String -> M.Map String String -> String -> FilePath
+mkOutputDir :: AbsDir -> M.Map String RelDir -> String -> FilePath
 mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputDir configOutputDirs templateSourcePath
   where
     getOutputDir dirs pathPrefix =
