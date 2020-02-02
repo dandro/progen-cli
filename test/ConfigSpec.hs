@@ -5,7 +5,14 @@ module ConfigSpec
 import           Config          (mkConfig, outputDirs, projectDir, separator,
                                   templatesDir)
 import           Data.Map.Strict (fromList)
+import           System.Path     (AbsDir, absDir, relDir, toString, (</>), rootDir)
 import           Test.Hspec      (Spec, describe, it, shouldBe)
+
+stubRootDir :: AbsDir
+stubRootDir = rootDir </> relDir "project"
+
+stubTemplatesDir :: AbsDir
+stubTemplatesDir = stubRootDir </> relDir "templates"
 
 configSuite :: Spec
 configSuite = do
@@ -16,13 +23,20 @@ configSuite = do
       mkConfig "{\"name\": \"daniel\"}" `shouldBe` Nothing
     it "should handle empty filenameSeparator value" $
       mkConfig
-        "{ \"root\": \"/project\", \"templates\": \"./templates\", \"filenameSeparator\": \"\", \"output\": { \"comp\": \"./components\" } }" `shouldBe`
+        ("{ \"root\": \"" ++
+         toString stubRootDir ++
+         "\", \"templates\": \"" ++
+         toString stubTemplatesDir ++ "\", \"filenameSeparator\": \"\", \"output\": { \"comp\": \"components\" } }") `shouldBe`
       Nothing
   describe "Config/mkConfig - Success" $ do
     let actual =
           mkConfig
-            "{ \"root\": \"/project\", \"templates\": \"./templates\", \"filenameSeparator\": \".\", \"output\": { \"comp\": \"./components\" } }"
-    it "should have project dir" $ (projectDir <$> actual) `shouldBe` Just "/project"
-    it "should have templates dir" $ (templatesDir <$> actual) `shouldBe` Just "./templates"
-    it "should have output mapping" $ (outputDirs <$> actual) `shouldBe` Just (fromList [("comp", "./components")])
+            ("{ \"root\": \"" ++
+             toString stubRootDir ++
+             "\", \"templates\": \"" ++
+             toString stubTemplatesDir ++ "\", \"filenameSeparator\": \".\", \"output\": { \"comp\": \"components\" } }")
+    it "should have project dir" $ (projectDir <$> actual) `shouldBe` Just stubRootDir
+    it "should have templates dir" $ (templatesDir <$> actual) `shouldBe` Just stubTemplatesDir
+    it "should have output mapping" $
+      (outputDirs <$> actual) `shouldBe` Just (fromList [("comp", relDir "./components")])
     it "should have a filename separator" $ (separator <$> actual) `shouldBe` Just '.'

@@ -11,7 +11,7 @@ import           Config                (GenConfig, separator, templatesDir)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
 import           System.Directory      (doesDirectoryExist, listDirectory)
-import           System.Path           ((</>), absDir, relFile, toString)
+import           System.Path.Generic   (absDir, relFile, toString, (</>))
 import           Utils                 (joinWith, pathStartsWith)
 
 data Template =
