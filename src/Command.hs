@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Command
   ( GenCommand(GenCommand, what, name, sub)
   , parserOptions
@@ -12,14 +10,15 @@ import qualified Data.Text             as T
 import           Options.Applicative   (Parser, eitherReader, fullDesc, header,
                                         help, helper, info, long, option,
                                         progDesc, short, strOption, value,
-                                        (<**>))
+                                        (<**>), switch)
 import           Utils                 (joinWith, trim)
 
 data GenCommand =
   GenCommand
-    { what :: String
-    , name :: String
-    , sub  :: M.Map String String
+    { what       :: String
+    , name       :: String
+    , sub        :: M.Map String String
+    , asModule :: Bool
     }
   deriving (Show)
 
@@ -60,7 +59,8 @@ makeGenCommand =
   option
     (eitherReader $ mkSubstitutions . toListOfStr)
     (long "substitution" <> short 's' <> value M.empty <>
-     help "Values to substitue in the template. The format is '-s \"$KEY_ONE$:value-one,$KEY_TWO$:value-two.\"'")
+     help "Values to substitue in the template. The format is '-s \"$KEY_ONE$:value-one,$KEY_TWO$:value-two.\"'") <*>
+   switch (long "as-module" <> short 'm' <> help "Treat as module. This will create a directory in the output location")
 
 parserOptions =
   info
