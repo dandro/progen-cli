@@ -1,12 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Template
-  ( Template(filename, content, extension, sourcePath)
+  ( Template(name, suffix, content, extension, sourcePath)
   , mkTemplate
   , getTemplateFiles
   ) where
 
-import           Command               (GenCommand (GenCommand), name, what)
+import qualified Command               as Comm
 import           Config                (GenConfig, separator, templatesDir)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
@@ -16,7 +16,8 @@ import           Utils                 (joinWith, pathStartsWith)
 
 data Template =
   Template
-    { filename   :: String
+    { name       :: String
+    , suffix     :: String
     , content    :: String
     , extension  :: String
     , sourcePath :: String
@@ -24,11 +25,10 @@ data Template =
   deriving (Show, Eq)
 
 toTemplate :: Char -> String -> (String, String) -> Template
-toTemplate separator' name (path, content) =
-  Template (joinWith [separator'] [name, suffix separator' path]) content (ext separator' path) path
+toTemplate separator' name (path, content) = Template name (mkSuffix separator' path) content (ext separator' path) path
 
-suffix :: Char -> String -> String
-suffix separator' path = findSuffix $ map BS.unpack $ BS.split separator' (BS.pack path)
+mkSuffix :: Char -> String -> String
+mkSuffix separator' path = findSuffix $ map BS.unpack $ BS.split separator' (BS.pack path)
   where
     findSuffix xs =
       if hasSuffix xs
@@ -39,10 +39,10 @@ suffix separator' path = findSuffix $ map BS.unpack $ BS.split separator' (BS.pa
 ext :: Char -> String -> String
 ext separator' path = BS.unpack $ last $ BS.split separator' (BS.pack path)
 
-mkTemplate :: String -> String -> String -> String -> Template
+mkTemplate :: String -> String -> String -> String -> String -> Template
 mkTemplate = Template
 
-getTemplateFiles :: GenConfig -> GenCommand -> IO [Template]
+getTemplateFiles :: GenConfig -> Comm.GenCommand -> IO [Template]
 getTemplateFiles config command =
   doesDirectoryExist (toString templatesPath) >>=
   (\case
@@ -52,7 +52,7 @@ getTemplateFiles config command =
           contents <- traverse (readFile . toString . (</>) templatesPath) (relFile <$> paths) -- TODO: Handle error when file does not exist
           pure $ zip paths contents)
      False -> pure []) <&> -- TODO: This should return an Either left of no template found
-  (<$>) (toTemplate (separator config) (name command))
+  (<$>) (toTemplate (separator config) (Comm.name command))
   where
     templatesPath = templatesDir config
-    pred = pathStartsWith $ what command
+    pred = pathStartsWith $ Comm.what command

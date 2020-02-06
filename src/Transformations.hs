@@ -5,13 +5,14 @@ module Transformations
 import           Command   (GenCommand, sub)
 import qualified Data.Map  as M
 import qualified Data.Text as T
-import           Template  (Template, content, extension, filename, mkTemplate,
+import           Template  (Template, content, extension, name, suffix, mkTemplate,
                             sourcePath)
 
 transformContent :: GenCommand -> Template -> Template
 transformContent command template =
   mkTemplate
-    (filename template)
+    (name template)
+    (suffix template)
     (foldr replace' (content template) (M.keys substitutions))
     (extension template)
     (sourcePath template)

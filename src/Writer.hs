@@ -2,10 +2,10 @@ module Writer
   ( write
   ) where
 
-import           Command               (GenCommand (GenCommand))
 import           Config                (GenConfig, outputDirs, projectDir,
                                         separator)
 import qualified Data.ByteString.Char8 as BS
+import           Data.Functor          (($>))
 import           Data.List             (find)
 import qualified Data.Map.Strict       as M
 import           Data.Maybe            (fromMaybe)
@@ -17,16 +17,8 @@ import           System.IO             (Handle, IOMode (ReadWriteMode), hClose,
 import           System.Path           (AbsDir, RelDir, RelFile, absDir, relDir,
                                         relFile, toString, (</>))
 import           System.Path.IO        (openFile)
-import           Template              (Template, content, extension, filename,
-                                        sourcePath)
+import qualified Template              as Tpl
 import           Utils                 (joinWith, pathStartsWith)
-
-write :: GenConfig -> Template -> IO (Either String String)
-write config template =
-  (Right $ "Created " <> filename template) <$ -- TODO: Fix this so we can handle errors (Lefts)
-  (getFileHandler out (getNameWithExt (separator config) template) >>= persistWithContent (content template))
-  where
-    out = mkOutputDir (projectDir config) (outputDirs config) (sourcePath template)
 
 mkOutputDir :: AbsDir -> M.Map String RelDir -> String -> AbsDir
 mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputDir configOutputDirs templateSourcePath
@@ -39,8 +31,9 @@ mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputD
                (find (pathStartsWith pathPrefix) dirKeys >>= (`M.lookup` dirs))
     dirKeys = M.keys configOutputDirs
 
-getNameWithExt :: Char -> Template -> RelFile
-getNameWithExt separator' template = relFile $ joinWith [separator'] [filename template, extension template]
+getNameWithExt :: Char -> Tpl.Template -> RelFile
+getNameWithExt separator' template =
+  relFile $ joinWith [separator'] [Tpl.name template, Tpl.suffix template, Tpl.extension template]
 
 getFileHandler :: AbsDir -> RelFile -> IO Handle
 getFileHandler dirPath filePath = do
@@ -53,3 +46,19 @@ persistWithContent :: String -> Handle -> IO ()
 persistWithContent content handle = do
   hPutStr handle content
   hClose handle
+
+combineWhenModule :: Bool -> Tpl.Template -> AbsDir -> AbsDir
+combineWhenModule asModule template out =
+  out </> -- TODO: Refactor this to use something like mappend to combine with name if is module
+  relDir
+    (if asModule
+       then Tpl.name template
+       else "")
+
+write :: Bool -> GenConfig -> Tpl.Template -> IO (Either String String)
+write asModule config template =
+  (getFileHandler (combineWhenModule asModule template out) (getNameWithExt (separator config) template) >>=
+   persistWithContent (Tpl.content template)) $>
+  (Right $ "Created " <> Tpl.name template) -- TODO: Fix this so we can handle errors (Lefts)
+  where
+    out = mkOutputDir (projectDir config) (outputDirs config) (Tpl.sourcePath template)

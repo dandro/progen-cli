@@ -1,5 +1,5 @@
 module Command
-  ( GenCommand(GenCommand, what, name, sub)
+  ( GenCommand(what, name, sub, asModule)
   , parserOptions
   ) where
 

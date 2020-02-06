@@ -2,7 +2,7 @@
 
 module Main where
 
-import           Command             (parserOptions)
+import           Command             (asModule, parserOptions)
 import           Config              (GenConfig, dotfileName, mkConfig)
 import           Data.Functor        ((<&>))
 import           Data.List           (intersperse)
@@ -29,7 +29,7 @@ main = do
        Left err -> putStrLn err
        Right conf -> do
          templates <- getTemplateFiles conf command
-         res <- traverse (write conf . transformContent command) templates
+         res <- traverse ((write $ asModule command) conf . transformContent command) templates
          (\case
             Left err -> putStrLn err
             Right msg -> putStrLn $ foldr (<>) "" $ intersperse "\n" msg) $
