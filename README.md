@@ -9,8 +9,10 @@ At the moment you need Stack to install the tool. Execute the `stack install` co
 
 ## CLI Options
 ```
-progencli (-w|--what ARG) (-n|--name ARG)
-                          [-s|--substitution ARG]
+Welcome to Progen Cli - Generate whatever you want for free
+
+Usage: <interactive> (-w|--what ARG) (-n|--name ARG) [-s|--substitution ARG]
+                     [-m|--as-module]
   Let's make your life easier
 
 Available options:
@@ -18,6 +20,8 @@ Available options:
   -n,--name ARG            Name of file you're generating
   -s,--substitution ARG    Values to substitue in the template. The format is
                            '-s "$KEY_ONE$:value-one,$KEY_TWO$:value-two."'
+  -m,--as-module           Treat as module. This will create a directory in the
+                           output location
   -h,--help                Show this help text
 ```
 
