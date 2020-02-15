@@ -5,7 +5,8 @@ module ConfigSpec
 import           Config          (mkConfig, outputDirs, projectDir, separator,
                                   templatesDir)
 import           Data.Map.Strict (fromList)
-import           System.Path     (AbsDir, absDir, relDir, toString, (</>), rootDir)
+import           System.Path     (AbsDir, absDir, relDir, rootDir, toString,
+                                  (</>))
 import           Test.Hspec      (Spec, describe, it, shouldBe)
 
 stubRootDir :: AbsDir
@@ -37,6 +38,5 @@ configSuite = do
              toString stubTemplatesDir ++ "\", \"filenameSeparator\": \".\", \"output\": { \"comp\": \"components\" } }")
     it "should have project dir" $ (projectDir <$> actual) `shouldBe` Just stubRootDir
     it "should have templates dir" $ (templatesDir <$> actual) `shouldBe` Just stubTemplatesDir
-    it "should have output mapping" $
-      (outputDirs <$> actual) `shouldBe` Just (fromList [("comp", relDir "./components")])
+    it "should have output mapping" $ (outputDirs <$> actual) `shouldBe` Just (fromList [("comp", relDir "components")])
     it "should have a filename separator" $ (separator <$> actual) `shouldBe` Just '.'

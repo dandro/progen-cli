@@ -1,23 +1,24 @@
 module Command
   ( GenCommand(what, name, sub, asModule)
   , parserOptions
+  , mkGenCommand
   ) where
 
 import qualified Data.ByteString.Char8 as BS
-import qualified Data.Map              as M
+import qualified Data.Map.Strict       as M
 import           Data.Semigroup        ((<>))
 import qualified Data.Text             as T
 import           Options.Applicative   (Parser, eitherReader, fullDesc, header,
                                         help, helper, info, long, option,
-                                        progDesc, short, strOption, value,
-                                        (<**>), switch)
+                                        progDesc, short, strOption, switch,
+                                        value, (<**>))
 import           Utils                 (joinWith, trim)
 
 data GenCommand =
   GenCommand
-    { what       :: String
-    , name       :: String
-    , sub        :: M.Map String String
+    { what     :: String
+    , name     :: String
+    , sub      :: M.Map String String
     , asModule :: Bool
     }
   deriving (Show)
@@ -52,18 +53,21 @@ safeInsert pair m =
 mkSubstitutions :: [[String]] -> Either String (M.Map String String)
 mkSubstitutions listOfPairs = traverse mkPair listOfPairs >>= foldr (\v acc -> acc >>= safeInsert v) (Right M.empty)
 
-makeGenCommand :: Parser GenCommand
-makeGenCommand =
+mkGenCommand :: String -> String -> M.Map String String -> Bool -> GenCommand
+mkGenCommand = GenCommand
+
+mkGenCommandParser :: Parser GenCommand
+mkGenCommandParser =
   GenCommand <$> strOption (long "what" <> short 'w' <> help "What do you want to generate") <*>
   strOption (long "name" <> short 'n' <> help "Name of file you're generating") <*>
   option
     (eitherReader $ mkSubstitutions . toListOfStr)
     (long "substitution" <> short 's' <> value M.empty <>
      help "Values to substitue in the template. The format is '-s \"$KEY_ONE$:value-one,$KEY_TWO$:value-two.\"'") <*>
-   switch (long "as-module" <> short 'm' <> help "Treat as module. This will create a directory in the output location")
+  switch (long "as-module" <> short 'm' <> help "Treat as module. This will create a directory in the output location")
 
 parserOptions =
   info
-    (makeGenCommand <**> helper)
+    (mkGenCommandParser <**> helper)
     (fullDesc <> progDesc "Let's make your life easier" <>
      header "Welcome to Progen Cli - Generate whatever you want for free")
