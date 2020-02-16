@@ -1,10 +1,16 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{-|
+Module: Config
+Description: Application configuration
+
+Contains metadata for the application as well as values needed for Progen to run.
+-}
 module Config
   ( GenConfig(projectDir, templatesDir, outputDirs, separator)
-  , dotfileName
   , mkConfig
+  , dotfileName
   ) where
 
 import           Data.Aeson                 (decode)
@@ -20,12 +26,16 @@ import           GHC.Generics               (Generic)
 import           System.Path                (AbsDir, RelDir, absDir, relDir)
 import           Utils                      (upperCase)
 
+{-|
+  It represents the data coming from the configuration file. More data can be needed but may not be configurable.
+  The Dotfile is used to create a GenConfig which will be used by the application.
+-}
 data Dotfile =
   Dotfile
-    { root              :: Last AbsDir
-    , templates         :: Last AbsDir
-    , output            :: Last (M.Map String RelDir)
-    , filenameSeparator :: Last Char
+    { root              :: Last AbsDir -- ^ Absolute directory path pointing to the root of the project using Progen.
+    , templates         :: Last AbsDir -- ^ Where are the templates. At the moment it can be out side of the root.
+    , output            :: Last (M.Map String RelDir) -- ^ Configuration for the output. Keys are matched on the names of the templates, the values are relative directory paths inside the root.
+    , filenameSeparator :: Last Char -- ^ Character used to separate the template filename and make use of suffix.
     }
   deriving (Generic, Show)
 
@@ -55,15 +65,19 @@ instance Semigroup Dotfile where
       , filenameSeparator = filenameSeparator a <> filenameSeparator b
       }
 
+{-|
+  This is the configuration used by the application wtih all the metadata needed to generate code.
+-}
 data GenConfig =
   GenConfig
-    { projectDir   :: AbsDir
-    , templatesDir :: AbsDir
-    , outputDirs   :: M.Map String RelDir
-    , separator    :: Char
+    { projectDir   :: AbsDir -- ^ Absolute directory path pointing to the root of the project using Progen.
+    , templatesDir :: AbsDir -- ^ Where are the templates. At the moment it can be out side of the root.
+    , outputDirs   :: M.Map String RelDir -- ^ Configuration for the output. Keys are matched on the names of the templates, the values are relative directory paths inside the root.
+    , separator    :: Char -- ^ Character used to separate the template filename and make use of suffix.
     }
   deriving (Show, Eq)
 
+-- | Name for the dotfile where the configuration will be read from
 dotfileName :: String
 dotfileName = ".progenrc"
 
@@ -76,6 +90,12 @@ emptyConfigOption = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last N
 decodeConfig :: String -> Dotfile
 decodeConfig content = fromMaybe emptyConfigOption (decode (LazyC.pack content) :: Maybe Dotfile)
 
+{-|
+  Factory to make a GenConfig from a JSONString. It will attempt to construct a Dotfile from its values
+  and then combine it with a default config. The result will be the GenConfig that will be returned.
+
+  >>> mkConfig "{ \"root\": \"/dummy/project\", \"templates\": \"/dummy/project/.progen/templates\", \"filenameSeparator\": \".\", \"output\": { \"component\": \"./components\" }}"
+-}
 mkConfig :: String -> Maybe GenConfig
 mkConfig content =
   GenConfig <$> getLast (root configOption) <*> getLast (templates configOption) <*> getLast (output configOption) <*>

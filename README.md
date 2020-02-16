@@ -79,3 +79,7 @@ progencli -w comp -n ExampleFunction -s "$NAME$:example"
 
 ## Development
 The project runs on Haskell GHC and has been setup with Stack version lts-13.29.
+
+## Generate Haddock Documentation
+run the `gen-docs.sh` shell script to create the code documentation. This is not to know how to 
+use the application, but to understand how it is built. It is meant for developers of the application. 

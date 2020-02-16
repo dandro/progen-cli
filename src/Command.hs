@@ -1,3 +1,10 @@
+{-|
+Module: Command
+Description: Parse cli command
+
+Module in charge of parsing the CLI command and constructing a domain
+specific representation of the instruction to execute.
+-}
 module Command
   ( GenCommand(what, name, sub, asModule)
   , parserOptions
@@ -8,30 +15,37 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Data.Map.Strict       as M
 import           Data.Semigroup        ((<>))
 import qualified Data.Text             as T
-import           Options.Applicative   (Parser, eitherReader, fullDesc, header,
-                                        help, helper, info, long, option,
-                                        progDesc, short, strOption, switch,
-                                        value, (<**>))
+import           Options.Applicative   (Parser, ParserInfo, eitherReader,
+                                        fullDesc, header, help, helper, info,
+                                        long, option, progDesc, short,
+                                        strOption, switch, value, (<**>))
 import           Utils                 (joinWith, trim)
 
+{-|
+  GenCommand represents the instructions the program will execute. It contains what we
+  are going to copy, its name and content substitutions as well as whether or not to treat
+  the artifact as a module.
+-}
 data GenCommand =
   GenCommand
-    { what     :: String
-    , name     :: String
-    , sub      :: M.Map String String
-    , asModule :: Bool
+    { what     :: String -- ^ What do we want to copy, or which template do we want to use.
+    , name     :: String -- ^ The name that will be given to the new files.
+    , sub      :: M.Map String String -- ^ Mapping of values to substitute in the templates content
+    , asModule :: Bool -- ^ Should the output files be treated as a module. If it is a module it will create a directory with the name and put the files inside.
     }
   deriving (Show)
 
+{-|
+  This function is meant to split the str by ','
+  first and then split each result by ':' and
+  then trim each string in the inner List. The
+  IDE helped format it this way but It's a tad hard
+  to grok.
+  e.g.
+       if str is "$A$:a, $B$:b"
+       then the result is [["A", "a"], ["B", "b"]]
+-}
 toListOfStr :: String -> [[String]]
--- This function is meant to split the str by ','
--- first and then split each result by ':' and
--- then trim each string in the inner List. The
--- IDE helped format it this way but It's a tad hard
--- to grok.
--- e.g.
---      if str is "$A$:a, $B$:b"
---      then the result is [["A", "a"], ["B", "b"]]
 toListOfStr str = map (map (trim . T.unpack) . T.splitOn (T.pack ":")) $ T.splitOn (T.pack ",") $ T.pack str
 
 hasEmptyStrings :: [String] -> Bool
@@ -53,7 +67,13 @@ safeInsert pair m =
 mkSubstitutions :: [[String]] -> Either String (M.Map String String)
 mkSubstitutions listOfPairs = traverse mkPair listOfPairs >>= foldr (\v acc -> acc >>= safeInsert v) (Right M.empty)
 
-mkGenCommand :: String -> String -> M.Map String String -> Bool -> GenCommand
+-- | GenCommand factory
+mkGenCommand ::
+     String -- ^ What do we want to copy, or which template do we want to use.
+  -> String -- ^ The name that will be given to the new files.
+  -> M.Map String String -- ^ Mapping of values to substitute in the templates content.
+  -> Bool -- ^ Should the output files be treated as a module. If it is a module it will create a directory with the name and put the files inside.
+  -> GenCommand
 mkGenCommand = GenCommand
 
 mkGenCommandParser :: Parser GenCommand
@@ -66,6 +86,11 @@ mkGenCommandParser =
      help "Values to substitue in the template. The format is '-s \"$KEY_ONE$:value-one,$KEY_TWO$:value-two.\"'") <*>
   switch (long "as-module" <> short 'm' <> help "Treat as module. This will create a directory in the output location")
 
+{-|
+  This is the configuration given to Opt-Parser Applicative. This is what will be used
+  in the cli program, the messages and banners displayed. It is a parser for GenCommand.
+-}
+parserOptions :: ParserInfo GenCommand
 parserOptions =
   info
     (mkGenCommandParser <**> helper)
