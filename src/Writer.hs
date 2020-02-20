@@ -1,3 +1,10 @@
+{-|
+Module: Writer
+Description: Write files
+
+Persist template.
+@Note: If there are many templates the operation is not atomic.@
+-}
 module Writer
   ( write
   ) where
@@ -55,7 +62,12 @@ combineWhenModule asModule template out =
        then Tpl.name template
        else "")
 
-write :: Bool -> GenConfig -> Tpl.Template -> IO (Either String String)
+-- | Write template file to output directory.
+write ::
+     Bool -- ^ Whether to write the file as a module. If true, it will create a directory and save the templates in it.
+  -> GenConfig -- ^ Config
+  -> Tpl.Template -- ^ Template to write to the output directory
+  -> IO (Either String String)
 write asModule config template =
   (getFileHandler (combineWhenModule asModule template out) (getNameWithExt (separator config) template) >>=
    persistWithContent (Tpl.content template)) $>

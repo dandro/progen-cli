@@ -10,6 +10,6 @@ done
 echo "Generaing documentation for ${xs}..."
 
 # shellcheck disable=SC2086
-stack exec -- haddock --html --title=Progen-cli $xs --odir=docs
+stack exec -- haddock --html --ignore-all-exports --title=Progen-cli $xs --odir=docs
 
 open docs/index.html
