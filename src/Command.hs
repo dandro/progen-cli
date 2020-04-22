@@ -6,12 +6,13 @@ Module in charge of parsing the CLI command and constructing a domain
 specific representation of the instruction to execute.
 -}
 module Command
-  ( GenCommand(what, name, sub, asModule)
+  ( GenCommand(what, name, sub, asModule, output)
   , parserOptions
   , mkGenCommand
   ) where
 
 import qualified Data.ByteString.Char8 as BS
+import           Data.Functor          ((<&>))
 import qualified Data.Map.Strict       as M
 import           Data.Semigroup        ((<>))
 import qualified Data.Text             as T
@@ -19,6 +20,7 @@ import           Options.Applicative   (Parser, ParserInfo, eitherReader,
                                         fullDesc, header, help, helper, info,
                                         long, option, progDesc, short,
                                         strOption, switch, value, (<**>))
+import           System.Path           (RelDir, parse)
 import           Utils                 (joinWith, trim)
 
 {-|
@@ -32,6 +34,7 @@ data GenCommand =
     , name     :: String -- ^ The name that will be given to the new files.
     , sub      :: M.Map String String -- ^ Mapping of values to substitute in the templates content
     , asModule :: Bool -- ^ Should the output files be treated as a module. If it is a module it will create a directory with the name and put the files inside.
+    , output   :: Maybe RelDir -- ^ Alternate output directory. Use to override config parameter
     }
   deriving (Show)
 
@@ -54,18 +57,21 @@ hasEmptyStrings = any null
 mkPair :: [String] -> Either String (String, String)
 mkPair pair =
   if length pair /= 2 || hasEmptyStrings pair
-    then Left $ "Invalid substitution value for: " ++ joinWith " " pair
+    then Left $ "ERROR: Invalid substitution value for: " ++ joinWith " " pair
     else Right (head pair, last pair)
 
 safeInsert :: (String, String) -> M.Map String String -> Either String (M.Map String String)
 safeInsert pair m =
   if M.member (fst pair) m
     then Left $
-         "Duplicate substitution value: " ++ fst pair ++ " has '" ++ (m M.! fst pair) ++ "' and '" ++ snd pair ++ "'."
+         "ERROR: Duplicate substitution value: " ++ fst pair ++ " has '" ++ (m M.! fst pair) ++ "' and '" ++ snd pair ++ "'."
     else Right $ uncurry M.insert pair m
 
 mkSubstitutions :: [[String]] -> Either String (M.Map String String)
 mkSubstitutions listOfPairs = traverse mkPair listOfPairs >>= foldr (\v acc -> acc >>= safeInsert v) (Right M.empty)
+
+mkOptionalOutput :: String -> Either String (Maybe RelDir)
+mkOptionalOutput str = (parse str :: Either String RelDir) <&> Just
 
 -- | GenCommand factory
 mkGenCommand ::
@@ -73,6 +79,7 @@ mkGenCommand ::
   -> String -- ^ The name that will be given to the new files.
   -> M.Map String String -- ^ Mapping of values to substitute in the templates content.
   -> Bool -- ^ Should the output files be treated as a module. If it is a module it will create a directory with the name and put the files inside.
+  -> Maybe RelDir -- ^ Alternate output directory. Use to override config parameter
   -> GenCommand
 mkGenCommand = GenCommand
 
@@ -84,7 +91,11 @@ mkGenCommandParser =
     (eitherReader $ mkSubstitutions . toListOfStr)
     (long "substitution" <> short 's' <> value M.empty <>
      help "Values to substitue in the template. The format is '-s \"$KEY_ONE$:value-one,$KEY_TWO$:value-two.\"'") <*>
-  switch (long "as-module" <> short 'm' <> help "Treat as module. This will create a directory in the output location")
+  switch (long "as-module" <> short 'm' <> help "Treat as module. This will create a directory in the output location") <*>
+  option
+    (eitherReader mkOptionalOutput)
+    (long "output" <> short 'o' <> value Nothing <>
+     help "Override the output from the configuration. The value must be a valid relative path.")
 
 {-|
   This is the configuration given to Opt-Parser Applicative. This is what will be used

@@ -10,6 +10,8 @@ Contains metadata for the application as well as values needed for Progen to run
 module Config
   ( GenConfig(projectDir, templatesDir, outputDirs, separator)
   , mkConfig
+  , mkDotfile
+  , Dotfile (root)
   , dotfileName
   ) where
 
@@ -50,11 +52,11 @@ instance FromJSON Dotfile where
     withObject
       "Dotfile"
       (\o -> do
-         root_ <- mkAbsDir <$> (o .: "root" :: Parser T.Text)
-         templates_ <- mkAbsDir <$> (o .: "templates" :: Parser T.Text)
-         output_ <- mkOutputDirs <$> (o .: "output" :: Parser (M.Map String String))
-         filenameSeparator_ <- o .: "filenameSeparator"
-         return $ Dotfile root_ templates_ output_ filenameSeparator_)
+         root' <- mkAbsDir <$> (o .: "root" :: Parser T.Text)
+         templates' <- mkAbsDir <$> (o .: "templates" :: Parser T.Text)
+         output' <- mkOutputDirs <$> (o .: "output" :: Parser (M.Map String String))
+         filenameSeparator' <- o .: "filenameSeparator"
+         return $ mkDotfile root' templates' output' filenameSeparator')
 
 instance Semigroup Dotfile where
   a <> b =
@@ -90,15 +92,18 @@ emptyConfigOption = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last N
 decodeConfig :: String -> Dotfile
 decodeConfig content = fromMaybe emptyConfigOption (decode (LazyC.pack content) :: Maybe Dotfile)
 
+mkDotfile :: Last AbsDir -> Last AbsDir -> Last (M.Map String RelDir) -> Last Char -> Dotfile
+mkDotfile = Dotfile
+
 {-|
   Factory to make a GenConfig from a JSONString. It will attempt to construct a Dotfile from its values
   and then combine it with a default config. The result will be the GenConfig that will be returned.
 
   >>> mkConfig "{ \"root\": \"/dummy/project\", \"templates\": \"/dummy/project/.progen/templates\", \"filenameSeparator\": \".\", \"output\": { \"component\": \"./components\" }}"
 -}
-mkConfig :: String -> Maybe GenConfig
-mkConfig content =
+mkConfig :: Dotfile -> String -> Maybe GenConfig
+mkConfig dotfile content =
   GenConfig <$> getLast (root configOption) <*> getLast (templates configOption) <*> getLast (output configOption) <*>
   getLast (filenameSeparator configOption)
   where
-    configOption = makeDefaultConfig <> decodeConfig content
+    configOption = makeDefaultConfig <> decodeConfig content <> dotfile

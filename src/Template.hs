@@ -61,7 +61,7 @@ mkTemplate = Template
   For each file in the directory it will match all files that start
   with the `what` passed in the command.
 -}
-getTemplateFiles :: GenConfig -> Comm.GenCommand -> IO [Template]
+getTemplateFiles :: GenConfig -> Comm.GenCommand -> IO (Either String [Template])
 getTemplateFiles config command =
   doesDirectoryExist (toString templatesPath) >>=
   (\case
@@ -70,8 +70,11 @@ getTemplateFiles config command =
        (\paths -> do
           contents <- traverse (readFile . toString . (</>) templatesPath) (relFile <$> paths) -- TODO: Handle error when file does not exist
           pure $ zip paths contents)
-     False -> pure []) <&> -- TODO: This should return an Either left of no template found
-  (<$>) (toTemplate (separator config) (Comm.name command))
+     False -> pure []) <&>
+  (<$>) (toTemplate (separator config) (Comm.name command)) <&>
+  (\case
+     [] -> Left "ERROR: Did not find any matching templates."
+     templates -> Right templates)
   where
     templatesPath = templatesDir config
     pred = pathStartsWith $ Comm.what command

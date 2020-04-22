@@ -2,9 +2,10 @@ module ConfigSpec
   ( configSuite
   ) where
 
-import           Config          (mkConfig, outputDirs, projectDir, separator,
-                                  templatesDir)
+import           Config          (Dotfile, mkConfig, mkDotfile, outputDirs,
+                                  projectDir, separator, templatesDir)
 import           Data.Map.Strict (fromList)
+import           Data.Monoid     (Last (Last))
 import           System.Path     (AbsDir, absDir, relDir, rootDir, toString,
                                   (</>))
 import           Test.Hspec      (Spec, describe, it, shouldBe)
@@ -15,15 +16,19 @@ stubRootDir = rootDir </> relDir "project"
 stubTemplatesDir :: AbsDir
 stubTemplatesDir = stubRootDir </> relDir "templates"
 
+emptyDotfile :: Dotfile
+emptyDotfile = mkDotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing)
+
 configSuite :: Spec
 configSuite = do
   describe "Config/mkConfig - Error" $ do
-    it "should handle an empty json string" $ mkConfig "" `shouldBe` Nothing
-    it "should handle an invalid json string" $ mkConfig "What's cooking, good looking?" `shouldBe` Nothing
+    it "should handle an empty json string" $ mkConfig emptyDotfile "" `shouldBe` Nothing
+    it "should handle an invalid json string" $ mkConfig emptyDotfile "What's cooking, good looking?" `shouldBe` Nothing
     it "should handle an valid json string without the correct values" $
-      mkConfig "{\"name\": \"daniel\"}" `shouldBe` Nothing
+      mkConfig emptyDotfile "{\"name\": \"daniel\"}" `shouldBe` Nothing
     it "should handle empty filenameSeparator value" $
       mkConfig
+        emptyDotfile
         ("{ \"root\": \"" ++
          toString stubRootDir ++
          "\", \"templates\": \"" ++
@@ -32,6 +37,7 @@ configSuite = do
   describe "Config/mkConfig - Success" $ do
     let actual =
           mkConfig
+            emptyDotfile
             ("{ \"root\": \"" ++
              toString stubRootDir ++
              "\", \"templates\": \"" ++
