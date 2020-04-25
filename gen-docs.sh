@@ -7,7 +7,7 @@ for f in $FILES; do
   xs+="src/$f "
 done
 
-echo "Generaing documentation for ${xs}..."
+echo "Generating documentation for ${xs}..."
 
 # shellcheck disable=SC2086
 stack exec -- haddock --html --ignore-all-exports --title=Progen-cli $xs --odir=docs

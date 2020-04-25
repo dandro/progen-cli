@@ -108,7 +108,15 @@ emptyConfigOption = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last N
 decodeConfig :: String -> Dotfile
 decodeConfig content = fromMaybe emptyConfigOption (decode (LazyC.pack content) :: Maybe Dotfile)
 
-mkDotfile :: Last AbsDir -> Last AbsDir -> Last (M.Map String RelDir) -> Last Char -> Dotfile
+{-|
+  Factory function for constructing a Dotfile
+-}
+mkDotfile ::
+  Last AbsDir  -- ^ Absolute directory path pointing to the root of the project using Progen.
+  -> Last AbsDir  -- ^ Where are the templates. At the moment it can be out side of the root.
+  -> Last (M.Map String RelDir)  -- ^ Configuration for the output. Keys are matched on the names of the templates, the values are relative directory paths inside the root.
+  -> Last Char  -- ^ Character used to separate the template filename and make use of suffix.
+  -> Dotfile
 mkDotfile = Dotfile
 
 {-|
