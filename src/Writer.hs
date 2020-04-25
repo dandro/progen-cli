@@ -71,6 +71,6 @@ write ::
 write asModule config template =
   (getFileHandler (combineWhenModule asModule template out) (getNameWithExt (separator config) template) >>=
    persistWithContent (Tpl.content template)) $>
-  (Right $ "Created " <> Tpl.name template) -- TODO: Fix this so we can handle errors (Lefts)
+  (Right $ "Created: " <> show template) -- TODO: Fix this so we can handle errors (Lefts)
   where
     out = mkOutputDir (projectDir config) (outputDirs config) (Tpl.sourcePath template)

@@ -9,6 +9,7 @@ module Command
   ( GenCommand(what, name, sub, asModule, output)
   , parserOptions
   , mkGenCommand
+  , CommandError
   ) where
 
 import qualified Data.ByteString.Char8 as BS
@@ -22,6 +23,7 @@ import           Options.Applicative   (Parser, ParserInfo, eitherReader,
                                         strOption, switch, value, (<**>))
 import           System.Path           (RelDir, parse)
 import           Utils                 (joinWith, trim)
+import Data.Bifunctor (first)
 
 {-|
   GenCommand represents the instructions the program will execute. It contains what we
@@ -36,6 +38,14 @@ data GenCommand =
     , asModule :: Bool -- ^ Should the output files be treated as a module. If it is a module it will create a directory with the name and put the files inside.
     , output   :: Maybe RelDir -- ^ Alternate output directory. Use to override config parameter
     }
+  deriving (Show)
+
+{-|
+  Encompasses all possible errors in the Command module
+-}
+data CommandError
+  = InvalidSubstitutionError String -- ^ If substitution does is not a key/value pair or it contains empty strings
+  | DuplicateSubstitutionError String -- ^ If more than one value has been passed for the same substitution key.
   deriving (Show)
 
 {-|
@@ -54,21 +64,22 @@ toListOfStr str = map (map (trim . T.unpack) . T.splitOn (T.pack ":")) $ T.split
 hasEmptyStrings :: [String] -> Bool
 hasEmptyStrings = any null
 
-mkPair :: [String] -> Either String (String, String)
+mkPair :: [String] -> Either CommandError (String, String)
 mkPair pair =
   if length pair /= 2 || hasEmptyStrings pair
-    then Left $ "ERROR: Invalid substitution value for: " ++ joinWith " " pair
+    then Left $ InvalidSubstitutionError ("ERROR: Invalid substitution value for: " ++ joinWith " " pair)
     else Right (head pair, last pair)
 
-safeInsert :: (String, String) -> M.Map String String -> Either String (M.Map String String)
+safeInsert :: (String, String) -> M.Map String String -> Either CommandError (M.Map String String)
 safeInsert pair m =
   if M.member (fst pair) m
-    then Left $
-         "ERROR: Duplicate substitution value: " ++ fst pair ++ " has '" ++ (m M.! fst pair) ++ "' and '" ++ snd pair ++ "'."
+    then Left $ DuplicateSubstitutionError
+         ("Duplicate substitution value: " ++
+         fst pair ++ " has '" ++ (m M.! fst pair) ++ "' and '" ++ snd pair ++ "'.")
     else Right $ uncurry M.insert pair m
 
 mkSubstitutions :: [[String]] -> Either String (M.Map String String)
-mkSubstitutions listOfPairs = traverse mkPair listOfPairs >>= foldr (\v acc -> acc >>= safeInsert v) (Right M.empty)
+mkSubstitutions listOfPairs = first show $ traverse mkPair listOfPairs >>= foldr (\v acc -> acc >>= safeInsert v) (Right M.empty)
 
 mkOptionalOutput :: String -> Either String (Maybe RelDir)
 mkOptionalOutput str = (parse str :: Either String RelDir) <&> Just

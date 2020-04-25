@@ -10,6 +10,7 @@ module Template
   ( Template(name, suffix, content, extension, sourcePath)
   , mkTemplate
   , getTemplateFiles
+  , TemplateError
   ) where
 
 import qualified Command               as Comm
@@ -32,6 +33,11 @@ data Template =
     , sourcePath :: String -- ^ Original filename of the template.
     }
   deriving (Show, Eq)
+
+{-|
+  Encompasses all possible errors in the Template module
+-}
+newtype TemplateError = NoMatchFound String deriving (Show)
 
 toTemplate :: Char -> String -> (String, String) -> Template
 toTemplate separator' name (path, content) = Template name (mkSuffix separator' path) content (ext separator' path) path
@@ -61,7 +67,7 @@ mkTemplate = Template
   For each file in the directory it will match all files that start
   with the `what` passed in the command.
 -}
-getTemplateFiles :: GenConfig -> Comm.GenCommand -> IO (Either String [Template])
+getTemplateFiles :: GenConfig -> Comm.GenCommand -> IO (Either TemplateError [Template])
 getTemplateFiles config command =
   doesDirectoryExist (toString templatesPath) >>=
   (\case
@@ -73,7 +79,7 @@ getTemplateFiles config command =
      False -> pure []) <&>
   (<$>) (toTemplate (separator config) (Comm.name command)) <&>
   (\case
-     [] -> Left "ERROR: Did not find any matching templates."
+     [] -> Left $ NoMatchFound "ERROR: Did not find any matching templates."
      templates -> Right templates)
   where
     templatesPath = templatesDir config

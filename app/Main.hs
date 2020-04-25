@@ -5,7 +5,7 @@ module Main where
 import           Command             (GenCommand, asModule, output,
                                       parserOptions, what)
 import           Config              (Dotfile, GenConfig, dotfileName, mkConfig,
-                                      mkDotfile)
+                                      mkDotfile, handleConfigResult, ConfigError)
 import           Data.Functor        ((<&>))
 import           Data.List           (intersperse)
 import           Data.Map.Strict     (fromList)
@@ -16,14 +16,11 @@ import           Template            (Template, getTemplateFiles)
 import           Transformations     (transformContent)
 import           Writer              (write)
 
-getConfig :: Dotfile -> IO (Either String GenConfig)
+getConfig :: Dotfile -> IO (Either ConfigError GenConfig)
 getConfig dotfile = do
   pwd <- getCurrentDirectory -- TODO: Should handle possible errors (This can throw some errors)
   result <- findFile [pwd] dotfileName >>= traverse readFile <&> (>>= mkConfig dotfile) -- TODO: test for findFile Nothing and mkConfig Nothing
-  pure $
-    case result of
-      Just config -> Right config
-      Nothing     -> Left "ERROR: Coud not make a valid configuration."
+  pure $ handleConfigResult result
 
 execWrite :: GenCommand -> GenConfig -> [Template] -> IO [Either String String]
 execWrite command conf templates = traverse (write (asModule command) conf) (transformContent command <$> templates)
@@ -39,11 +36,11 @@ main = do
           (Last Nothing)
   config' <- getConfig dotfile
   (\case
-     Left err -> putStrLn err
+     Left err -> print err
      Right conf ->
        getTemplateFiles conf command >>=
        (\case
-          Left err -> putStrLn err
+          Left err -> print err
           Right templates ->
             execWrite command conf templates >>=
             ((\case

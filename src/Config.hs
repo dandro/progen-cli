@@ -11,8 +11,10 @@ module Config
   ( GenConfig(projectDir, templatesDir, outputDirs, separator)
   , mkConfig
   , mkDotfile
-  , Dotfile (root)
   , dotfileName
+  , handleConfigResult
+  , Dotfile
+  , ConfigError
   ) where
 
 import           Data.Aeson                 (decode)
@@ -40,6 +42,20 @@ data Dotfile =
     , filenameSeparator :: Last Char -- ^ Character used to separate the template filename and make use of suffix.
     }
   deriving (Generic, Show)
+
+{-|
+  Encompasses all possible errors in the Config module
+-}
+newtype ConfigError = 
+  CouldNotMakeConfig String -- ^ Cannot create a valid config from all inputs
+  deriving (Show)
+
+{-|
+  Transform maybe config to an Either of the correct Domain error or the valid Config
+-}
+handleConfigResult :: Maybe GenConfig -> Either ConfigError GenConfig
+handleConfigResult (Just config) = Right config
+handleConfigResult Nothing = Left $ CouldNotMakeConfig "ERROR: Coud not make a valid configuration."
 
 mkAbsDir :: T.Text -> Last AbsDir
 mkAbsDir = Last . Just . absDir . T.unpack
