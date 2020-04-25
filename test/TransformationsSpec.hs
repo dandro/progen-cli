@@ -4,7 +4,7 @@ module TransformationsSpec
 
 import           Command         (mkGenCommand)
 import qualified Data.Map.Strict as M
-import           Template        (mkTemplate, Template)
+import           Template        (Template, mkTemplate)
 import           Test.Hspec      (Spec, describe, it, shouldBe)
 import           Transformations
 
@@ -26,12 +26,16 @@ transformationsSuite =
       transformContent (mkGenCommand "" "" (M.fromList [("span", "p")]) False Nothing) mockTemplate `shouldBe`
       mkExpectedTemplate "export default const $NAME$ = <p>MyComponent</p>;"
     it "should not change the template if the substitutions are not found in the content" $
-      transformContent (mkGenCommand "" "" (M.fromList [("$SOURCE$", "source")]) False Nothing) mockTemplate `shouldBe` mockTemplate
+      transformContent (mkGenCommand "" "" (M.fromList [("$SOURCE$", "source")]) False Nothing) mockTemplate `shouldBe`
+      mockTemplate
     it "should handle multiple substitutions in the same content" $
-      transformContent (mkGenCommand "" "" (M.fromList [("span", "p"), ("NAME", "MeinButton")]) False Nothing) mockTemplate `shouldBe`
+      transformContent
+        (mkGenCommand "" "" (M.fromList [("span", "p"), ("NAME", "MeinButton")]) False Nothing)
+        mockTemplate `shouldBe`
       mkExpectedTemplate "export default const MeinButton = <p>MyComponent</p>;"
     it "should not change the template if the content is empty" $
       transformContent (mkGenCommand "" "" (M.fromList [("NAME", "MeinButton")]) False Nothing) (mkExpectedTemplate "") `shouldBe`
       mkExpectedTemplate ""
     it "should only substitute a value if it is within $s" $
-      transformContent (mkGenCommand "" "" (M.fromList [("const", "let")]) False Nothing) mockTemplate `shouldBe` mockTemplate
+      transformContent (mkGenCommand "" "" (M.fromList [("const", "let")]) False Nothing) mockTemplate `shouldBe`
+      mockTemplate
