@@ -29,4 +29,5 @@ transformContent command template =
     (sourcePath template)
   where
     substitutions = sub command
-    replace' key content' = T.unpack $ T.replace (T.pack key) (T.pack (substitutions M.! key)) $ T.pack content'
+    replace' key content' =
+      T.unpack $ T.replace (T.pack ("$" <> key <> "$")) (T.pack (substitutions M.! key)) $ T.pack content'
