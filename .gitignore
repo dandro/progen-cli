@@ -6,3 +6,4 @@ progen-cli.cabal
 .progenrc
 *.iml
 out/
+node_modules

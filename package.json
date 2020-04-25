@@ -1,0 +1,28 @@
+{
+  "name": "progen-cli",
+  "version": "1.0.0",
+  "description": "Progen CLI is a code generation tool for projects",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "docs:serve": "codedoc serve",
+    "docs:build": "codedoc build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dandro/progen-cli.git"
+  },
+  "keywords": [
+    "haskell",
+    "code",
+    "generation"
+  ],
+  "author": "dnlmrtnz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dandro/progen-cli/issues"
+  },
+  "homepage": "https://github.com/dandro/progen-cli#readme"
+}
