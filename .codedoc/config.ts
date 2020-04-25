@@ -13,4 +13,11 @@ export const config = /*#__PURE__*/configuration({
     }
   },
   
+  misc: {
+    github: {
+      user: 'dandro',
+      repo: 'progen-cli',
+      large: true,
+    }
+  }
 });

@@ -1,8 +1,7 @@
+*Current Version: 0.0.0*
+<br><br><br><br>
 [Home](/)
-[Markdown Cheat Sheet](/docs/cheat-sheet)
-[Code Features](/docs/code-features)
-
-<br><br>
-
-To add links to your other documents, simply
-modify contents of `docs/md/_toc.md`.
+[Quick Start](/docs/quick-start)
+[Config](/docs/config)
+[Templates](/docs/templates)
+[CLI](/docs/cli)

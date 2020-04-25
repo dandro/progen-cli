@@ -1,0 +1,106 @@
+{
+  "init": [
+    {
+      "name": "initJssCs",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/transport/setup-jss.js",
+      "hash": "ktTt65eiYqsD/BNWZp0gag=="
+    },
+    {
+      "name": "installTheme",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/content/theme.ts",
+      "hash": "9P9TfBS81AvpfK0lAyWCBA=="
+    },
+    {
+      "name": "codeSelection",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/selection.js",
+      "hash": "g3eTMKuyB0gk7Nd7/LxLtw=="
+    },
+    {
+      "name": "sameLineLengthInCodes",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/same-line-length.js",
+      "hash": "v9oHy6j+FvKQmUU/yE2uVA=="
+    },
+    {
+      "name": "initHintBox",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/line-hint/index.js",
+      "hash": "LBlHjw98H/hn0Wo6t/FhhQ=="
+    },
+    {
+      "name": "initCodeLineRef",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/line-ref/index.js",
+      "hash": "m+Jm+CIHGCYNNYjSOVivjw=="
+    },
+    {
+      "name": "initSmartCopy",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/smart-copy.js",
+      "hash": "8CYay3r5TMVfasJRVbkiGQ=="
+    },
+    {
+      "name": "copyHeadings",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/heading/copy-headings.js",
+      "hash": "gZeHzFhuoinAZ//JOz+tCQ=="
+    },
+    {
+      "name": "contentNavHighlight",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/contentnav/highlight.js",
+      "hash": "Njyqe9XvVfoK+m3qfIYMwQ=="
+    },
+    {
+      "name": "loadDeferredIFrames",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/transport/deferred-iframe.js",
+      "hash": "/dMqouHzJPtGnwPn+JALsQ=="
+    },
+    {
+      "name": "smoothLoading",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/transport/smooth-loading.js",
+      "hash": "W1USTWEjwKtY1BSeaVxYjQ=="
+    },
+    {
+      "name": "tocHighlight",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/toc-highlight.js",
+      "hash": "bjRQlGR9f9ZZ5xHIFL4Lhg=="
+    },
+    {
+      "name": "postNavSearch",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/search/post-nav/index.js",
+      "hash": "myzId/6yAOBKRYDqh5BQ1g=="
+    }
+  ],
+  "components": [
+    {
+      "name": "ToCPrevNext",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/prevnext/index.js",
+      "hash": "zyEsvuaLkfrWq2QfzDRHOA=="
+    },
+    {
+      "name": "GithubSearch",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/misc/github/search.js",
+      "hash": "wCR4oefqeEqXKXSlPABG/g=="
+    },
+    {
+      "name": "ToCToggle",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/toggle/index.js",
+      "hash": "3pUrTu0nD7QHTKxdCVhO6g=="
+    },
+    {
+      "name": "DarkModeSwitch",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/darkmode/index.js",
+      "hash": "K1ctEvy9jvqcm0mVwtUqQw=="
+    },
+    {
+      "name": "ConfigTransport",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/transport/config.js",
+      "hash": "H+BOVL1d6Jlaf+t5vK1DyQ=="
+    },
+    {
+      "name": "TabSelector",
+      "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/components/tabs/selector.js",
+      "hash": "zAY18kfbF7IL9RRY57V69Q=="
+    }
+  ],
+  "renderer": {
+    "name": "getRenderer",
+    "filename": "/Users/daniel.martinez/Documents/haskell/progen-cli/.codedoc/node_modules/@codedoc/core/dist/es6/transport/renderer.js",
+    "hash": "7TZaeOR1V1tO8hE5PgXmqw=="
+  }
+}
