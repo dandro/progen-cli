@@ -18,7 +18,8 @@ import           Config                (GenConfig, separator, templatesDir)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
 import           System.Directory      (doesDirectoryExist, listDirectory)
-import           System.Path.Generic   (absDir, relFile, toString, (</>))
+import           System.Path   (AbsDir, absDir, relFile, toString,
+                                        (</>))
 import           Utils                 (joinWith, pathStartsWith)
 
 -- | A Template represents the file that is going to be written. It
@@ -37,7 +38,9 @@ data Template =
 {-|
   Encompasses all possible errors in the Template module
 -}
-newtype TemplateError = NoMatchFound String deriving (Show)
+newtype TemplateError =
+  NoMatchFound String
+  deriving (Show)
 
 toTemplate :: Char -> String -> (String, String) -> Template
 toTemplate separator' name (path, content) = Template name (mkSuffix separator' path) content (ext separator' path) path
@@ -67,8 +70,8 @@ mkTemplate = Template
   For each file in the directory it will match all files that start
   with the `what` passed in the command.
 -}
-getTemplateFiles :: GenConfig -> Comm.GenCommand -> IO (Either TemplateError [Template])
-getTemplateFiles config command =
+getTemplateFiles :: AbsDir -> GenConfig -> Comm.GenCommand -> IO (Either TemplateError [Template])
+getTemplateFiles root config command =
   doesDirectoryExist (toString templatesPath) >>=
   (\case
      True ->
@@ -82,5 +85,5 @@ getTemplateFiles config command =
      [] -> Left $ NoMatchFound "ERROR: Did not find any matching templates."
      templates -> Right templates)
   where
-    templatesPath = templatesDir config
+    templatesPath = root </> templatesDir config
     pred = pathStartsWith $ Comm.what command

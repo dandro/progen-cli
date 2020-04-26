@@ -1,21 +1,17 @@
 # Config
 
 The dotfile configuration is how Progen knows about the project, where it's templates 
-are located, mapping of templates and outputs and more.
+are located, mapping of templates names and outputs and more.
 
 To get started, create a file called `.progenrc`. Although it does not matter where 
 this file is you must execute all progen cli commands in the directory this file is in 
 so for this guide we'll assume it is at the root of your project. It must have the following 
 properties:
 
-### root
-This is an absolute path to the root of the project. Output directories need to be 
-relative to the `root`.
-
 ### templates
-This is and absolute path to the directory where the templates are located. It can 
+This is a relative path to the directory where the templates are located. It can 
 be anywhere in the project but in this documentation we'll assume it 
-is `${root}/.progen/templates`
+is `.progen/templates`
 
 ### filenameSeparator
 This is the character you use to separate parts of your file's name. For example if 
@@ -68,7 +64,6 @@ The result will be:
 
 ```md | .progenrc
 {
-  "root": "DIR_PATH",
   "templates": "TEMPLATES_PATH",
   "filenameSeparator": "FILENAME_SEPARATOR_CHAR",
   "output": {

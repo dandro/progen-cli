@@ -13,8 +13,7 @@ in depth. For more information continue reading this documentation.
 > >
 > > ``` md | .progenrc
 > > {
-> >   "root": "/Users/me/my-projects", <!--> Modify to point to your actual project. The path must be absolute. -->
-> >   "templates": "/Users/me/my-projects/.progen/templates", <!--> The path must be absolute. -->
+> >   "templates": ".progen/templates", <!--> The path must be absolute. -->
 > >   "filenameSeparator": ".",
 > >   "output": {
 > >     "component": "./components"

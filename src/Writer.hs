@@ -7,10 +7,10 @@ Persist template.
 -}
 module Writer
   ( write
+  , WriterError
   ) where
 
-import           Config                (GenConfig, outputDirs, projectDir,
-                                        separator)
+import           Config                (GenConfig, outputDirs, separator)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          (($>))
 import           Data.List             (find)
@@ -26,6 +26,8 @@ import           System.Path           (AbsDir, RelDir, RelFile, absDir, relDir,
 import           System.Path.IO        (openFile)
 import qualified Template              as Tpl
 import           Utils                 (joinWith, pathStartsWith)
+
+newtype WriterError = FailedToWrite String deriving Show
 
 mkOutputDir :: AbsDir -> M.Map String RelDir -> String -> AbsDir
 mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputDir configOutputDirs templateSourcePath
@@ -64,13 +66,14 @@ combineWhenModule asModule template out =
 
 -- | Write template file to output directory.
 write ::
-     Bool -- ^ Whether to write the file as a module. If true, it will create a directory and save the templates in it.
+  AbsDir -- ^ Current working directory
+  -> Bool -- ^ Whether to write the file as a module. If true, it will create a directory and save the templates in it.
   -> GenConfig -- ^ Config
   -> Tpl.Template -- ^ Template to write to the output directory
-  -> IO (Either String String)
-write asModule config template =
+  -> IO (Either WriterError String)
+write root asModule config template =
   (getFileHandler (combineWhenModule asModule template out) (getNameWithExt (separator config) template) >>=
    persistWithContent (Tpl.content template)) $>
   (Right $ "Created: " <> show template) -- TODO: Fix this so we can handle errors (Lefts)
   where
-    out = mkOutputDir (projectDir config) (outputDirs config) (Tpl.sourcePath template)
+    out = mkOutputDir root (outputDirs config) (Tpl.sourcePath template)

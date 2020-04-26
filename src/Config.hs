@@ -8,7 +8,7 @@ Description: Application configuration
 Contains metadata for the application as well as values needed for Progen to run.
 -}
 module Config
-  ( GenConfig(projectDir, templatesDir, outputDirs, separator)
+  ( GenConfig(templatesDir, outputDirs, separator)
   , mkConfig
   , mkDotfile
   , dotfileName
@@ -27,8 +27,9 @@ import           Data.Maybe                 (fromMaybe)
 import           Data.Monoid                (Last (Last), getLast)
 import qualified Data.Text                  as T
 import           GHC.Generics               (Generic)
-import           System.Path                (AbsDir, RelDir, absDir, relDir)
+import           System.Path                (AbsDir, RelDir, absDir, relDir, Dir)
 import           Utils                      (upperCase)
+import System.Path.Generic ((</>))
 
 {-|
   It represents the data coming from the configuration file. More data can be needed but may not be configurable.
@@ -36,8 +37,7 @@ import           Utils                      (upperCase)
 -}
 data Dotfile =
   Dotfile
-    { root              :: Last AbsDir -- ^ Absolute directory path pointing to the root of the project using Progen.
-    , templates         :: Last AbsDir -- ^ Where are the templates. At the moment it can be out side of the root.
+    { templates         :: Last RelDir -- ^ Templates directory path relative to the root.
     , output            :: Last (M.Map String RelDir) -- ^ Configuration for the output. Keys are matched on the names of the templates, the values are relative directory paths inside the root.
     , filenameSeparator :: Last Char -- ^ Character used to separate the template filename and make use of suffix.
     }
@@ -57,8 +57,8 @@ handleConfigResult :: Maybe GenConfig -> Either ConfigError GenConfig
 handleConfigResult (Just config) = Right config
 handleConfigResult Nothing = Left $ CouldNotMakeConfig "ERROR: Coud not make a valid configuration."
 
-mkAbsDir :: T.Text -> Last AbsDir
-mkAbsDir = Last . Just . absDir . T.unpack
+mkDirPath :: (String -> Dir os) -> T.Text -> Last (Dir os)
+mkDirPath toPath = Last . Just . toPath . T.unpack
 
 mkOutputDirs :: M.Map String String -> Last (M.Map String RelDir)
 mkOutputDirs m = Last $ Just (M.foldrWithKey (\k v result -> M.insert k (relDir v) result) M.empty m)
@@ -68,17 +68,15 @@ instance FromJSON Dotfile where
     withObject
       "Dotfile"
       (\o -> do
-         root' <- mkAbsDir <$> (o .: "root" :: Parser T.Text)
-         templates' <- mkAbsDir <$> (o .: "templates" :: Parser T.Text)
+         templates' <- mkDirPath relDir <$> (o .: "templates" :: Parser T.Text)
          output' <- mkOutputDirs <$> (o .: "output" :: Parser (M.Map String String))
          filenameSeparator' <- o .: "filenameSeparator"
-         return $ mkDotfile root' templates' output' filenameSeparator')
+         return $ mkDotfile templates' output' filenameSeparator')
 
 instance Semigroup Dotfile where
   a <> b =
     Dotfile
-      { root = root a <> root b
-      , templates = templates a <> templates b
+      { templates = templates a <> templates b
       , output = output a <> output b
       , filenameSeparator = filenameSeparator a <> filenameSeparator b
       }
@@ -88,8 +86,7 @@ instance Semigroup Dotfile where
 -}
 data GenConfig =
   GenConfig
-    { projectDir   :: AbsDir -- ^ Absolute directory path pointing to the root of the project using Progen.
-    , templatesDir :: AbsDir -- ^ Where are the templates. At the moment it can be out side of the root.
+    { templatesDir :: RelDir -- ^ Templates directory path relative to the root.
     , outputDirs   :: M.Map String RelDir -- ^ Configuration for the output. Keys are matched on the names of the templates, the values are relative directory paths inside the root.
     , separator    :: Char -- ^ Character used to separate the template filename and make use of suffix.
     }
@@ -100,10 +97,10 @@ dotfileName :: String
 dotfileName = ".progenrc"
 
 makeDefaultConfig :: Dotfile
-makeDefaultConfig = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last $ Just '.')
+makeDefaultConfig = Dotfile (Last Nothing) (Last Nothing) (Last $ Just '.')
 
 emptyConfigOption :: Dotfile
-emptyConfigOption = Dotfile (Last Nothing) (Last Nothing) (Last Nothing) (Last Nothing)
+emptyConfigOption = Dotfile (Last Nothing) (Last Nothing) (Last Nothing)
 
 decodeConfig :: String -> Dotfile
 decodeConfig content = fromMaybe emptyConfigOption (decode (LazyC.pack content) :: Maybe Dotfile)
@@ -112,8 +109,7 @@ decodeConfig content = fromMaybe emptyConfigOption (decode (LazyC.pack content) 
   Factory function for constructing a Dotfile
 -}
 mkDotfile ::
-  Last AbsDir  -- ^ Absolute directory path pointing to the root of the project using Progen.
-  -> Last AbsDir  -- ^ Where are the templates. At the moment it can be out side of the root.
+  Last RelDir -- ^ Templates directory path relative to the root.
   -> Last (M.Map String RelDir)  -- ^ Configuration for the output. Keys are matched on the names of the templates, the values are relative directory paths inside the root.
   -> Last Char  -- ^ Character used to separate the template filename and make use of suffix.
   -> Dotfile
@@ -123,11 +119,11 @@ mkDotfile = Dotfile
   Factory to make a GenConfig from a JSONString. It will attempt to construct a Dotfile from its values
   and then combine it with a default config. The result will be the GenConfig that will be returned.
 
-  >>> mkConfig "{ \"root\": \"/dummy/project\", \"templates\": \"/dummy/project/.progen/templates\", \"filenameSeparator\": \".\", \"output\": { \"component\": \"./components\" }}"
+  >>> mkConfig "{ \"root\": \"/dummy/project\", \"templates\": \".progen/templates\", \"filenameSeparator\": \".\", \"output\": { \"component\": \"./components\" }}"
 -}
 mkConfig :: Dotfile -> String -> Maybe GenConfig
 mkConfig dotfile content =
-  GenConfig <$> getLast (root configOption) <*> getLast (templates configOption) <*> getLast (output configOption) <*>
+  GenConfig <$> getLast (templates configOption) <*> getLast (output configOption) <*>
   getLast (filenameSeparator configOption)
   where
     configOption = makeDefaultConfig <> decodeConfig content <> dotfile
