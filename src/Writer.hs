@@ -27,7 +27,9 @@ import           System.Path.IO        (openFile)
 import qualified Template              as Tpl
 import           Utils                 (joinWith, pathStartsWith)
 
-newtype WriterError = FailedToWrite String deriving Show
+newtype WriterError =
+  FailedToWrite String
+  deriving (Show)
 
 mkOutputDir :: AbsDir -> M.Map String RelDir -> String -> AbsDir
 mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputDir configOutputDirs templateSourcePath
@@ -40,9 +42,10 @@ mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputD
                (find (pathStartsWith pathPrefix) dirKeys >>= (`M.lookup` dirs))
     dirKeys = M.keys configOutputDirs
 
-getNameWithExt :: Char -> Tpl.Template -> RelFile
-getNameWithExt separator' template =
+getNameWithExt :: Bool -> Char -> Tpl.Template -> RelFile
+getNameWithExt False separator' template =
   relFile $ joinWith [separator'] [Tpl.name template, Tpl.suffix template, Tpl.extension template]
+getNameWithExt True separator' template = relFile $ joinWith [separator'] [Tpl.suffix template, Tpl.extension template]
 
 getFileHandler :: AbsDir -> RelFile -> IO Handle
 getFileHandler dirPath filePath = do
@@ -66,13 +69,13 @@ combineWhenModule asModule template out =
 
 -- | Write template file to output directory.
 write ::
-  AbsDir -- ^ Current working directory
+     AbsDir -- ^ Current working directory
   -> Bool -- ^ Whether to write the file as a module. If true, it will create a directory and save the templates in it.
   -> GenConfig -- ^ Config
   -> Tpl.Template -- ^ Template to write to the output directory
   -> IO (Either WriterError String)
 write root asModule config template =
-  (getFileHandler (combineWhenModule asModule template out) (getNameWithExt (separator config) template) >>=
+  (getFileHandler (combineWhenModule asModule template out) (getNameWithExt asModule (separator config) template) >>=
    persistWithContent (Tpl.content template)) $>
   (Right $ "Created: " <> show template) -- TODO: Fix this so we can handle errors (Lefts)
   where

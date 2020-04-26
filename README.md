@@ -7,21 +7,10 @@ Progen does not contain any templates itself, you must create them all.
 ## Installation
 At the moment you need Stack to install the tool. Execute the `stack install` command which should install the binary in your path. 
 
-## Configuration
-
-| Property          | Description           | Example           |
-| ----------------- |---------------------- |------------------ |
-| root              |  Project Root. Must be an absolute path. | /Users/daniel/git/my-project |
-| templates         |  Path to templates. Must be an absolute path. | /Users/daniel/git/my-project/.progen/templates |
-| filenameSeparator |  Character used to separate parts of the filename. This way we can identify suffix to the name. | in "page.view.js" the separator is '.' |
-| output            |  Object mapping of template names and where the template should be saved.  | `{ "component.view": "./views", "component.type": "./types" }` |
-
-
 You can use this example configuration to get started:
 
 ```json
 {
-  "root": "DIR_PATH",
   "templates": "TEMPLATES_PATH",
   "filenameSeparator": "FILENAME_SEPARATOR_CHAR",
   "output": {

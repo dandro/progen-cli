@@ -48,14 +48,16 @@ Our configuration output mapping is:
 }
 ```
 
-And we run `progen -w feature -n MyFeature` Progen will produce:
+Now, we run `progen -w feature -n MyFeature` Progen will produce:
 
 ```md | cli -m
 modules/
     MyFeature/
-        MyFeature.component.js
-        MyFeature.reducer.js
+        component.js
+        reducer.js
 ```
+
+> Note: When we use `as-module` the name is not appended to the resulting filename.
 
 ### -o | --output
 Use the `-o` arg to override the configuration. This will ignore every 
