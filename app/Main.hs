@@ -16,12 +16,11 @@ import           System.Directory    (findFile, getCurrentDirectory)
 import           System.Path         (AbsDir, absDir)
 import           Template            (Template, getTemplateFiles)
 import           Transformations     (transformContent)
-import           Writer              (write, WriterError)
+import           Writer              (WriterError, write)
 
 getConfig :: FilePath -> Dotfile -> IO (Either ConfigError GenConfig)
-getConfig pwd dotfile = do
-  result <- findFile [pwd] dotfileName >>= traverse readFile <&> (>>= mkConfig dotfile) -- TODO: test for findFile Nothing and mkConfig Nothing
-  pure $ handleConfigResult result
+getConfig pwd dotfile =
+  findFile [pwd] dotfileName >>= traverse readFile <&> (>>= mkConfig dotfile) <&> handleConfigResult -- TODO: May want to handle findFile Nothing separate to mkConfig Nothing
 
 execWrite :: AbsDir -> GenCommand -> GenConfig -> [Template] -> IO [Either WriterError String]
 execWrite root command conf templates =

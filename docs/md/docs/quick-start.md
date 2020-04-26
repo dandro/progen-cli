@@ -13,7 +13,7 @@ in depth. For more information continue reading this documentation.
 > >
 > > ``` md | .progenrc
 > > {
-> >   "templates": ".progen/templates", <!--> The path must be absolute. -->
+> >   "templates": ".progen/templates", <!--> Relative to current working directory. -->
 > >   "filenameSeparator": ".",
 > >   "output": {
 > >     "component": "./components"
@@ -25,7 +25,7 @@ in depth. For more information continue reading this documentation.
 > >
 > > ## Create Templates
 > >
-> > Create a new file and save it to `${root}/.progen/templates/component.js`.
+> > Create a new file and save it to `.progen/templates/component.js`.
 > >
 > > ``` md | 
 > > export default function $NAME$() {

@@ -9,8 +9,8 @@ so for this guide we'll assume it is at the root of your project. It must have t
 properties:
 
 ### templates
-This is a relative path to the directory where the templates are located. It can 
-be anywhere in the project but in this documentation we'll assume it 
+This is a relative path from current working directory to the directory where the templates 
+are located. It can be anywhere in the project but in this documentation we'll assume it 
 is `.progen/templates`
 
 ### filenameSeparator
