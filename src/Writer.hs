@@ -5,6 +5,8 @@ Description: Write files
 Persist template.
 @Note: If there are many templates the operation is not atomic.@
 -}
+{-# LANGUAGE LambdaCase #-}
+
 module Writer
   ( write
   , WriterError
@@ -42,10 +44,23 @@ mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputD
                (find (pathStartsWith pathPrefix) dirKeys >>= (`M.lookup` dirs))
     dirKeys = M.keys configOutputDirs
 
-getNameWithExt :: Bool -> Char -> Tpl.Template -> RelFile
-getNameWithExt False separator' template =
-  relFile $ joinWith [separator'] [Tpl.name template, Tpl.suffix template, Tpl.extension template]
-getNameWithExt True separator' template = relFile $ joinWith [separator'] [Tpl.suffix template, Tpl.extension template]
+getNameWithExt :: Bool -> Maybe Char -> Tpl.Template -> RelFile
+getNameWithExt asModule separator' template =
+  relFile $ joinWith [withSeparator separator'] nameParts
+  where
+    suffix' = Tpl.suffix template
+    nameParts =
+      if asModule
+        then [ if null suffix'
+                 then Tpl.name template
+                 else suffix'
+             , Tpl.extension template
+             ]
+        else [Tpl.name template, Tpl.suffix template, Tpl.extension template]
+    withSeparator =
+      \case
+        Nothing -> '.'
+        Just sep -> sep
 
 getFileHandler :: AbsDir -> RelFile -> IO Handle
 getFileHandler dirPath filePath = do
@@ -75,8 +90,9 @@ write ::
   -> Tpl.Template -- ^ Template to write to the output directory
   -> IO (Either WriterError String)
 write root asModule config template =
-  (getFileHandler (combineWhenModule asModule template out) (getNameWithExt asModule (separator config) template) >>=
-   persistWithContent (Tpl.content template)) $>
-  (Right $ "Created: " <> show template) -- TODO: Fix this so we can handle errors (Lefts)
+  (getFileHandler outDir filename >>= persistWithContent (Tpl.content template)) $>
+  (Right $ "Created: " <> Tpl.name template <> " at " <> toString (outDir </> filename)) -- TODO: Fix this so we can handle errors (Lefts)
   where
     out = mkOutputDir root (outputDirs config) (Tpl.sourcePath template)
+    outDir = combineWhenModule asModule template out
+    filename = getNameWithExt asModule (separator config) template

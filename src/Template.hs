@@ -18,7 +18,7 @@ import           Config                (GenConfig, separator, templatesDir)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Functor          ((<&>))
 import           System.Directory      (doesDirectoryExist, listDirectory)
-import           System.Path   (AbsDir, absDir, relFile, toString,
+import           System.Path           (AbsDir, absDir, relFile, toString,
                                         (</>))
 import           Utils                 (joinWith, pathStartsWith)
 
@@ -42,8 +42,10 @@ newtype TemplateError =
   NoMatchFound String
   deriving (Show)
 
-toTemplate :: Char -> String -> (String, String) -> Template
-toTemplate separator' name (path, content) = Template name (mkSuffix separator' path) content (ext separator' path) path
+toTemplate :: Maybe Char -> String -> (String, String) -> Template
+toTemplate Nothing name (path, content) = Template name "" content (ext '.' path) path
+toTemplate (Just separator') name (path, content) =
+  Template name (mkSuffix separator' path) content (ext separator' path) path
 
 {-|
   Use the filename separator to find and return the @suffix@ for the template.

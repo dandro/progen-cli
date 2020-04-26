@@ -1,23 +1,22 @@
 # Config
 
 The dotfile configuration is how Progen knows about the project, where it's templates 
-are located, mapping of templates names and outputs and more.
+are, mapping of templates names and outputs and more.
 
 To get started, create a file called `.progenrc`. Although it does not matter where 
-this file is you must execute all progen cli commands in the directory this file is in 
+this file is you must execute all Progen cli commands in the directory this file is in 
 so for this guide we'll assume it is at the root of your project. It must have the following 
 properties:
 
 ### templates
 This is a relative path from current working directory to the directory where the templates 
-are located. It can be anywhere in the project but in this documentation we'll assume it 
-is `.progen/templates`
+are. It can be anywhere in the project but in this documentation we'll assume it 
+is `.progen/templates`.
 
-### filenameSeparator
-This is the character you use to separate parts of your file's name. For example if 
-your filename is `page.view.js` then your `filenameSeparator` is '.'. This is useful 
-to group related files by their name. This means that if you have a `page` template
-which is made out of 3 files
+### filenameSeparator (Optional)
+This is a character to separate parts of your file's name. For example if your filename is 
+`page.view.js` then your `filenameSeparator` is '.'. This is useful to group related files 
+by their name. This means that if you have a `page` template which is made out of 3 files,
 
 ```md | Page
 page.view.js
@@ -25,7 +24,23 @@ page.types.js
 page.spec.js
 ```
 
-You can call progen with `-w page` and all 3 files will be copied. 
+You can call Progen with `-w page -n home` and all 3 files will be copied, and the result will be
+
+```md | Filename Separator
+home.view.js
+home.types.js
+home.spec.js
+``` 
+
+Or if you want a module instead pass the `-m` arg, like so `-w page -n home -m` and Progen will 
+create a directory with the name passed while keeping the suffixes for files copied.
+
+```md | Filename Separator
+home/
+    view.js
+    types.js
+    spec.js
+```
 
 ### Output
 This is a key/value mapping of filename and path. The output of a file is picked by how 
@@ -65,7 +80,7 @@ The result will be:
 ```md | .progenrc
 {
   "templates": "TEMPLATES_PATH",
-  "filenameSeparator": "FILENAME_SEPARATOR_CHAR",
+  "filenameSeparator": "FILENAME_SEPARATOR_CHAR", <!--> This is optional -->
   "output": {
     "FILENAME_KEY": "RELATIVE_PATH"
   }

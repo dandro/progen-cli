@@ -5,6 +5,7 @@ module ConfigSpec
 import           Config          (Dotfile, mkConfig, mkDotfile, outputDirs,
                                   separator, templatesDir)
 import           Data.Map.Strict (fromList)
+import           Data.Maybe      (isJust)
 import           Data.Monoid     (Last (Last))
 import           System.Path     (AbsDir, RelDir, absDir, relDir, rootDir,
                                   toString, (</>))
@@ -37,4 +38,10 @@ configSuite = do
              toString stubTemplatesDir ++ "\", \"filenameSeparator\": \".\", \"output\": { \"comp\": \"components\" } }")
     it "should have templates dir" $ (templatesDir <$> actual) `shouldBe` Just stubTemplatesDir
     it "should have output mapping" $ (outputDirs <$> actual) `shouldBe` Just (fromList [("comp", relDir "components")])
-    it "should have a filename separator" $ (separator <$> actual) `shouldBe` Just '.'
+    it "should have a filename separator" $ (separator =<< actual) `shouldBe` Just '.'
+    it "should create a valid config without filename separator" $ do
+      let actualWithoutSeparator =
+            mkConfig
+              emptyDotfile
+              ("{ \"templates\": \"" ++ toString stubTemplatesDir ++ "\", \"output\": { \"comp\": \"components\" } }")
+      isJust actualWithoutSeparator `shouldBe` True

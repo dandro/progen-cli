@@ -14,7 +14,6 @@ in depth. For more information continue reading this documentation.
 > > ``` md | .progenrc
 > > {
 > >   "templates": ".progen/templates", <!--> Relative to current working directory. -->
-> >   "filenameSeparator": ".",
 > >   "output": {
 > >     "component": "./components"
 > >   }
