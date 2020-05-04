@@ -50,10 +50,10 @@ you can be more specific and use `component.view`.
 Templates can have variables which will be substituted when copying the template. 
 Simply put a name between dollar signs. For example `function $NAME$() {` and pass 
 in the substitution in the CLI with the `-s or --substitute` command. The value for 
-the substitute cli argument is a `key:value` pairs separated by `;`.
+the substitute cli argument is a `key:value` pairs separated by `,`.
 
-```md | Substitutions
-progen -w component -n MySection -s "NAME:MySection; TITLE:This is my Section"
+``` bash | Substitutions
+progen -w component -n MySection -s "NAME:MySection, TITLE:This is my Section"
 ```
 
 This command will substitute `$NAME$` for MySection and `$TITLE` for "This is my Section".

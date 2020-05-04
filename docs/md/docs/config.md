@@ -18,7 +18,7 @@ This is a character to separate parts of your file's name. For example if your f
 `page.view.js` then your `filenameSeparator` is '.'. This is useful to group related files 
 by their name. This means that if you have a `page` template which is made out of 3 files,
 
-```md | Page
+``` md | Page
 page.view.js
 page.types.js
 page.spec.js
@@ -26,7 +26,7 @@ page.spec.js
 
 You can call Progen with `-w page -n home` and all 3 files will be copied, and the result will be
 
-```md | Filename Separator
+``` md | Filename Separator
 home.view.js
 home.types.js
 home.spec.js
@@ -35,7 +35,7 @@ home.spec.js
 Or if you want a module instead pass the `-m` arg, like so `-w page -n home -m` and Progen will 
 create a directory with the name passed while keeping the suffixes for files copied.
 
-```md | Filename Separator
+``` md | Filename Separator
 home/
     view.js
     types.js
@@ -48,7 +48,7 @@ close it matches the template filename. Output keys can overlap to give some fil
 group a different output path. For example, let's assume want all your type files in a type 
 directory. Given the following templates:
 
-```md | Page
+``` md | Page
 page.view.js
 page.spec.js
 page.types.js
@@ -56,7 +56,7 @@ page.types.js
 
 You can have the following output configuration:
 
-```md | .progenrc
+``` json | .progenrc
 {
   "output": {
     "page": "./pages",
@@ -67,7 +67,7 @@ You can have the following output configuration:
 
 The result will be:
 
-```md | Result
+``` md | Result
 /pages
     page.view.js
     page.spec.js
@@ -77,10 +77,10 @@ The result will be:
 
 ## Example Config File
 
-```md | .progenrc
+``` json | .progenrc
 {
   "templates": "TEMPLATES_PATH",
-  "filenameSeparator": "FILENAME_SEPARATOR_CHAR", <!--> This is optional -->
+  "filenameSeparator": "FILENAME_SEPARATOR_CHAR", /* --> This is optional. */
   "output": {
     "FILENAME_KEY": "RELATIVE_PATH"
   }

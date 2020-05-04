@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Progen CLI is a code generation tool for your project",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
     "docs:serve": "codedoc serve",
     "docs:build": "codedoc build"

@@ -18,13 +18,13 @@ What is the name of the generated code? This name will be used as the name of
 the file or directory create.
 
 ### -s | --substitutions
-Accepts a string of `;` separated `key:value` pairs. If the `key` appears between 
+Accepts a string of `,` separated `key:value` pairs. If the `key` appears between 
 dollar signs within the content of templates matched, it will be replaced with the 
 value provided. For example, if your template contains `function $my-function-name$() {}` 
 then you can call Progen with `-s "my-function-name:main"` and the resulting file 
 will have `function main() {}` in it.
 
-You can also have many substitutions for one command. For example `-s "ONE:first; TWO:second"`.
+You can also have many substitutions for one command. For example `-s "ONE:first, TWO:second"`.
 
 > ⚠️ The substitution will apply to all matches in the template content. If you 
 > have $NAME$ 3 times, all 3 instances will be changed.

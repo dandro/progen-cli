@@ -11,9 +11,9 @@ in depth. For more information continue reading this documentation.
 > > Create a file called .progenrc at the root of you project
 > > with the following content
 > >
-> > ``` md | .progenrc
+> > ``` json | .progenrc
 > > {
-> >   "templates": ".progen/templates", <!--> Relative to current working directory. -->
+> >   "templates": ".progen/templates", /* --> Relative to current working directory. */
 > >   "output": {
 > >     "component": "./components"
 > >   }
@@ -26,7 +26,7 @@ in depth. For more information continue reading this documentation.
 > >
 > > Create a new file and save it to `.progen/templates/component.js`.
 > >
-> > ``` md | 
+> > ``` javascript | component.js
 > > export default function $NAME$() {
 > >     return (
 > >         <section>
@@ -45,7 +45,9 @@ in depth. For more information continue reading this documentation.
 > > ## Use the CLI
 > > 
 > > Open the terminal and call Progen with the following arguments:
-> > `progen -w component -n Section -m -s "NAME:Section""`
+> > ``` bash | terminal
+> > progen -w component -n Section -m -s "NAME:Section"
+> > ```
 > 
 > > :Tab title=Step Four
 > >

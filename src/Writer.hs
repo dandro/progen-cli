@@ -29,12 +29,14 @@ import           System.Path.IO        (openFile)
 import qualified Template              as Tpl
 import           Utils                 (joinWith, pathStartsWith)
 
+-- | WriterError represents all the possible error states in the Write module
 newtype WriterError =
-  FailedToWrite String
+  FailedToWrite String -- ^ The process failed to write for some reason. More information should be found in the string.
   deriving (Show)
 
 mkOutputDir :: AbsDir -> M.Map String RelDir -> String -> AbsDir
-mkOutputDir baseDir configOutputDirs templateSourcePath = baseDir </> getOutputDir configOutputDirs templateSourcePath
+mkOutputDir baseDir configOutputDirs templateSourcePath =
+  baseDir </> getOutputDir configOutputDirs templateSourcePath
   where
     getOutputDir dirs pathPrefix =
       if null pathPrefix
@@ -56,7 +58,7 @@ getNameWithExt asModule separator' template =
                  else suffix'
              , Tpl.extension template
              ]
-        else [Tpl.name template, Tpl.suffix template, Tpl.extension template]
+        else [Tpl.name template, suffix', Tpl.extension template]
     withSeparator =
       \case
         Nothing -> '.'
