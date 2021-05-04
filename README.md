@@ -1,4 +1,7 @@
 # progen-cli
+
+THIS REPOSITORY HAS BEEN ARCHIVED. THE PROJECT NOW LIVES UNDER THE [SKAT](https://github.com/dandro/skat-engine) WHICH IS MEAN TO EXTEND ON THIS IDEA AS WELL AS ADD MORE FUNCTIONALITY. 
+
 Cli tool for generating code for your project.
 
 The tool copies templates and performs substitutions on its contents based on values passed it from the command line. 
